@@ -1,8 +1,10 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
-import vercel from "@astrojs/vercel/serverless";
 import svelte from "@astrojs/svelte";
+
+// Importar la versión específica del adaptador
+import vercel from "@astrojs/vercel/serverless";
 
 // https://astro.build/config
 export default defineConfig({
@@ -11,15 +13,12 @@ export default defineConfig({
   // Mantener modo servidor para SSR
   output: "server",
   adapter: vercel({
-    webAnalytics: {
-      enabled: true,
-    },
-    // Optimizar para velocidad de respuesta
-    speedInsights: {
-      enabled: true,
-    },
-    // Configurar explícitamente Node.js 20
-    nodeVersion: "20.x",
+    // Configuración mínima para evitar conflictos
+    analytics: true,
+    includeFiles: ["./dist/client/**/*"],
+
+    // Forzar Node.js 20.x
+    runtime: "nodejs20.x",
   }),
   // Configuración de servidor para arreglar problemas de WebSocket
   server: {

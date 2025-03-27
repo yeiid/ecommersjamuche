@@ -1,0 +1,20 @@
+# Archivos de desarrollo que no necesitamos en producción
+tests/
+*.test.js
+*.spec.js
+
+# Carpetas generadas localmente
+.git
+.vscode
+.astro/cache
+
+# Archivos de documentación
+*.md
+*.txt
+SETUP_*.md
+SUPABASE_*.md
+ANALISIS-*.md
+GUIA_*.md
+
+# Logs y depuración
+dev.log 
