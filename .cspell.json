@@ -9,12 +9,8 @@
     "svelte",
     "tailwindcss",
     "vitest",
-    "supabase"
+    "supabase",
+    "diagnóstico"
   ],
-  "ignorePaths": [
-    "node_modules",
-    "dist",
-    "build",
-    "coverage"
-  ]
-} 
+  "ignorePaths": ["node_modules", "dist", "build", "coverage"]
+}

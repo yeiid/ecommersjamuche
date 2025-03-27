@@ -1,0 +1,21 @@
+---
+import AdminLayout from "../../../components/admin/AdminLayout.astro";
+
+// Prerender: false para SSR
+export const prerender = false;
+---
+
+<AdminLayout>
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+    <h1 class="text-2xl font-bold mb-4">Diagnóstico del Sistema</h1>
+
+    <div class="grid gap-4">
+      <div class="border border-gray-200 dark:border-gray-700 p-4 rounded">
+        <h2 class="font-bold text-lg mb-2">Información del Servidor</h2>
+        <p>Versión de Astro: 5.5.4</p>
+        <p>Modo: {import.meta.env.MODE}</p>
+        <p>Fecha: {new Date().toLocaleString()}</p>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
