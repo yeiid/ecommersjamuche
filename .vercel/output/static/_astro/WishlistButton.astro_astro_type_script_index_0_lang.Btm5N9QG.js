@@ -1,0 +1,1 @@
+import{b as i}from"./wishlistStore.DdiVJu_S.js";import"./client.schema.D9gTZs88.js";import"./index.9eZ28vGx.js";document.addEventListener("DOMContentLoaded",()=>{const t=document.getElementById("wishlist-count");t&&(t.textContent=i.get().toString(),i.subscribe(e=>{t.textContent=e.toString(),e>0?t.classList.remove("hidden"):t.classList.add("hidden")}))});

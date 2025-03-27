@@ -1,0 +1,336 @@
+---
+// ProductCard.astro - Tarjeta para mostrar productos
+const {
+  id,
+  name,
+  price,
+  discountPrice = 0,
+  image,
+  description = "Sin descripción disponible",
+  rating = 0,
+  category = "",
+  isNew = false,
+} = Astro.props;
+
+// Formatear precios
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+  }).format(price);
+};
+
+const hasDiscount = discountPrice > 0;
+const formattedPrice = formatPrice(price);
+const formattedDiscountPrice = hasDiscount ? formatPrice(discountPrice) : "";
+---
+
+<div
+  class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+  data-product-id={id}
+  data-product-name={name}
+  data-product-category={category}
+  data-product-description={description}
+  data-product-price={price}
+  data-product-discount-price={discountPrice}
+>
+  <div class="relative">
+    <a href={`/producto/${id}`} class="block">
+      <img
+        src={image}
+        alt={name}
+        class="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+      />
+    </a>
+
+    {
+      hasDiscount && (
+        <span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
+          OFERTA
+        </span>
+      )
+    }
+
+    {
+      isNew && (
+        <span class="absolute top-2 left-2 bg-primary-500 text-white text-xs font-semibold px-2 py-1 rounded">
+          NUEVO
+        </span>
+      )
+    }
+
+    <button
+      class="wishlist-btn absolute top-2 right-2 bg-white dark:bg-gray-900 p-1.5 rounded-full shadow hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      data-product-id={id}
+    >
+      <svg
+        class="h-5 w-5 wishlist-icon text-gray-500 dark:text-gray-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+        ></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="p-4">
+    <a
+      href={`/producto/${id}`}
+      class="block hover:text-primary-600 transition-colors"
+    >
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+        {name}
+      </h3>
+    </a>
+
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 mt-1">
+      {description}
+    </p>
+
+    <div class="flex items-center justify-between mt-2">
+      <div>
+        {
+          hasDiscount ? (
+            <div>
+              <span class="text-gray-500 dark:text-gray-400 text-sm line-through">
+                {formattedPrice}
+              </span>
+              <div class="text-lg font-bold text-gray-800 dark:text-white">
+                {formattedDiscountPrice}
+              </div>
+            </div>
+          ) : (
+            <div class="text-lg font-bold text-gray-800 dark:text-white">
+              {formattedPrice}
+            </div>
+          )
+        }
+      </div>
+
+      <button
+        class="add-to-cart-btn inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors"
+        aria-label="Añadir al carrito"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 mr-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+          ></path>
+        </svg>
+        Agregar
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenedor de notificaciones para este producto -->
+  <div
+    class="product-notification hidden fixed top-4 right-4 p-4 rounded-lg shadow-lg max-w-md z-50"
+  >
+  </div>
+</div>
+
+<script>
+  import { addToCart } from "../../stores/cartStore";
+  import {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+  } from "../../stores/wishlistStore";
+  import { addToViewedProducts } from "../../stores/recommendationsStore";
+  import {
+    validateClientProduct,
+    prepareProductForCart,
+    validatePrice,
+  } from "../../schemas/client.schema.js";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Mostrar notificación
+    function showNotification(message, type = "success", duration = 3000) {
+      const productCards = document.querySelectorAll(".product-card");
+
+      productCards.forEach((card) => {
+        const notification = card.querySelector(".product-notification");
+        if (!notification) return;
+
+        // Configurar el estilo según el tipo
+        if (type === "success") {
+          notification.className =
+            "product-notification fixed top-4 right-4 p-4 rounded-lg shadow-lg max-w-md z-50 bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100";
+        } else {
+          notification.className =
+            "product-notification fixed top-4 right-4 p-4 rounded-lg shadow-lg max-w-md z-50 bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100";
+        }
+
+        notification.textContent = message;
+        notification.classList.remove("hidden");
+
+        // Ocultar después de la duración
+        setTimeout(() => {
+          notification.classList.add("hidden");
+        }, duration);
+      });
+    }
+
+    // Extraer datos del producto desde el elemento HTML
+    function extractProductData(productCard) {
+      if (!productCard) return null;
+
+      try {
+        const id = productCard.getAttribute("data-product-id");
+        const name = productCard.getAttribute("data-product-name");
+        const image = productCard.querySelector("img")?.getAttribute("src");
+        const description = productCard.getAttribute(
+          "data-product-description"
+        );
+        const priceAttr = productCard.getAttribute("data-product-price");
+        const discountPriceAttr = productCard.getAttribute(
+          "data-product-discount-price"
+        );
+        const category = productCard.getAttribute("data-product-category");
+
+        // Validar campos obligatorios
+        if (!id || !name || !image || !priceAttr) {
+          throw new Error("Datos de producto incompletos");
+        }
+
+        // Convertir valores
+        const price = validatePrice(priceAttr);
+        const discountprice = validatePrice(discountPriceAttr || "0");
+
+        // Crear y validar el objeto de producto
+        return validateClientProduct({
+          id,
+          name,
+          price,
+          image,
+          description: description || "",
+          category: category || "",
+          discountprice,
+        });
+      } catch (error) {
+        console.error("Error al extraer datos del producto:", error);
+        showNotification(
+          error.message || "Error al procesar el producto",
+          "error"
+        );
+        return null;
+      }
+    }
+
+    // Añadir al carrito
+    document.querySelectorAll(".add-to-cart-btn").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        try {
+          const target = e.currentTarget as HTMLElement;
+          const productCard = target.closest(".product-card");
+
+          // Extraer y validar datos del producto
+          const productData = extractProductData(productCard);
+          if (!productData) return;
+
+          // Preparar el producto para el carrito (con validación)
+          const cartItem = prepareProductForCart(productData);
+
+          // Añadir al carrito
+          addToCart(cartItem);
+
+          // Efecto visual
+          const originalText = target.innerText;
+          target.innerText = "✓ Añadido";
+          setTimeout(() => {
+            target.innerText = originalText;
+          }, 1500);
+
+          // Mostrar notificación de éxito
+          showNotification("Producto añadido al carrito con éxito");
+        } catch (error) {
+          console.error("Error al añadir al carrito:", error);
+          showNotification(
+            error.message || "No se pudo añadir el producto al carrito",
+            "error"
+          );
+        }
+      });
+    });
+
+    // Lista de deseos
+    document.querySelectorAll(".wishlist-btn").forEach((button) => {
+      const productId = button.getAttribute("data-product-id");
+      if (!productId) return;
+
+      // Inicializar estado
+      updateWishlistUI(button, isInWishlist(productId));
+
+      button.addEventListener("click", () => {
+        try {
+          const productCard = button.closest(".product-card");
+          if (!productCard || !productId) return;
+
+          if (isInWishlist(productId)) {
+            // Eliminar de favoritos
+            removeFromWishlist(productId);
+            updateWishlistUI(button, false);
+            showNotification("Producto eliminado de favoritos");
+          } else {
+            // Extraer y validar datos del producto
+            const productData = extractProductData(productCard);
+            if (!productData) return;
+
+            // Añadir a favoritos
+            addToWishlist(productData);
+            updateWishlistUI(button, true);
+            showNotification("Producto añadido a favoritos");
+          }
+        } catch (error) {
+          console.error("Error con la lista de deseos:", error);
+          showNotification(
+            error.message || "Error al procesar la lista de deseos",
+            "error"
+          );
+        }
+      });
+    });
+
+    // Actualizar UI wishlist
+    function updateWishlistUI(button: Element, inWishlist: boolean) {
+      const icon = button.querySelector(".wishlist-icon");
+      if (!icon) return;
+
+      if (inWishlist) {
+        icon.classList.add("text-red-500");
+        icon.setAttribute("fill", "currentColor");
+      } else {
+        icon.classList.remove("text-red-500");
+        icon.setAttribute("fill", "none");
+      }
+    }
+
+    // Registrar productos vistos
+    document.querySelectorAll(".product-card").forEach((card) => {
+      try {
+        const productData = extractProductData(card);
+        if (productData) {
+          addToViewedProducts(productData);
+        }
+      } catch (error) {
+        console.error("Error al registrar producto visto:", error);
+        // No mostramos notificación aquí para no molestar al usuario
+      }
+    });
+  });
+</script>

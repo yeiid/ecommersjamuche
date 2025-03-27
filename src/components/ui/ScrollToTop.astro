@@ -1,0 +1,63 @@
+---
+// No necesitamos importaciones especiales para este componente
+---
+
+<button
+  id="scroll-to-top"
+  class="fixed bottom-6 right-20 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 dark:text-white z-40 opacity-0 pointer-events-none"
+  aria-label="Volver arriba"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+
+<script>
+  // Lógica para mostrar/ocultar el botón y hacer scroll suave
+  const scrollToTopButton = document.getElementById("scroll-to-top");
+
+  if (scrollToTopButton) {
+    // Mostrar el botón cuando se haga scroll hacia abajo
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 300) {
+        scrollToTopButton.classList.add("opacity-100");
+        scrollToTopButton.classList.remove("opacity-0", "pointer-events-none");
+      } else {
+        scrollToTopButton.classList.remove("opacity-100");
+        scrollToTopButton.classList.add("opacity-0", "pointer-events-none");
+      }
+    });
+
+    // Hacer scroll suave hacia arriba al hacer clic
+    scrollToTopButton.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    });
+  }
+</script>
+
+<style>
+  /* Transición suave para mostrar/ocultar el botón */
+  #scroll-to-top {
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  #scroll-to-top:hover {
+    transform: translateY(-5px);
+  }
+</style>
+

@@ -1,0 +1,20 @@
+{
+  "version": "0.2",
+  "language": "en,es",
+  "words": [
+    "nanostores",
+    "astro",
+    "ecommersjamuche",
+    "jamuchee",
+    "svelte",
+    "tailwindcss",
+    "vitest",
+    "supabase"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage"
+  ]
+} 

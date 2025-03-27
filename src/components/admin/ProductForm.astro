@@ -1,0 +1,597 @@
+---
+import { getAllEspecies } from "../../stores/especiesStore";
+import { saveProduct } from "../../stores/productStore";
+import { formDataToProduct } from "../../schemas/product.schema";
+import {
+  handleValidationError,
+  DatabaseError,
+  ValidationError,
+} from "../../schemas/errors";
+
+// Obtener todas las especies para seleccionar - añadiendo await
+const especies = await getAllEspecies();
+
+// Asegurar que especies sea siempre un array
+const especiesList = Array.isArray(especies) ? especies : [];
+
+// Producto existente si se está editando
+const { product = null } = Astro.props;
+
+// Verificar si estamos editando o creando
+const isEditing = !!product;
+
+// Valores predeterminados para el formulario
+const defaultValues = {
+  id: product?.id || "",
+  name: product?.name || "",
+  price: product?.price || 0,
+  discountprice: product?.discountprice || 0,
+  image: product?.image || "",
+  description: product?.description || "",
+  category: product?.category || "Aceites esenciales",
+  stock: product?.stock || 10,
+  isnew: product?.isnew || false,
+  rating: product?.rating || 4.0,
+  features: product?.features || [],
+  ingredients: product?.ingredients || [],
+  especieid: product?.especieid || "",
+};
+
+// Categorías disponibles
+const categories = [
+  "Aceites esenciales",
+  "Cuidado de piel",
+  "Infusiones",
+  "Aromaterapia",
+  "Productos capilares",
+  "Suplementos",
+];
+---
+
+<div class="max-w-4xl mx-auto">
+  <form id="product-form" class="space-y-6">
+    <!-- ID del producto (oculto si es nuevo) -->
+    <input type="hidden" id="product-id" name="id" value={defaultValues.id} />
+
+    <!-- Notificación de error -->
+    <div
+      id="error-message"
+      class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 hidden"
+    >
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg
+            class="h-5 w-5 text-red-400"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p id="error-text" class="text-sm text-red-700">
+            Error al guardar el producto.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información básica -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        Información Básica
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Nombre del producto -->
+        <div>
+          <label
+            for="name"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Nombre del producto *
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={defaultValues.name}
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+            required
+          />
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="name"
+          >
+          </div>
+        </div>
+
+        <!-- Categoría -->
+        <div>
+          <label
+            for="category"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Categoría *
+          </label>
+          <select
+            id="category"
+            name="category"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+            required
+          >
+            <option value="">Seleccionar categoría</option>
+            {
+              categories.map((category) => (
+                <option
+                  value={category}
+                  selected={defaultValues.category === category}
+                >
+                  {category}
+                </option>
+              ))
+            }
+          </select>
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="category"
+          >
+          </div>
+        </div>
+
+        <!-- Precio -->
+        <div>
+          <label
+            for="price"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Precio (COP) *
+          </label>
+          <input
+            type="number"
+            id="price"
+            name="price"
+            value={defaultValues.price}
+            min="0"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+            required
+          />
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="price"
+          >
+          </div>
+        </div>
+
+        <!-- Precio de descuento -->
+        <div>
+          <label
+            for="discountprice"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Precio de descuento
+          </label>
+          <input
+            type="number"
+            id="discountprice"
+            name="discountprice"
+            value={defaultValues.discountprice}
+            min="0"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+          />
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="discountprice"
+          >
+          </div>
+        </div>
+
+        <!-- Stock -->
+        <div>
+          <label
+            for="stock"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Stock disponible *
+          </label>
+          <input
+            type="number"
+            id="stock"
+            name="stock"
+            value={defaultValues.stock}
+            min="0"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+            required
+          />
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="stock"
+          >
+          </div>
+        </div>
+
+        <!-- Calificación -->
+        <div>
+          <label
+            for="rating"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Calificación
+          </label>
+          <input
+            type="number"
+            id="rating"
+            name="rating"
+            value={defaultValues.rating}
+            min="0"
+            max="5"
+            step="0.1"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+          />
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="rating"
+          >
+          </div>
+        </div>
+
+        <!-- URL de la imagen -->
+        <div class="md:col-span-2">
+          <label
+            for="image"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            URL de la imagen *
+          </label>
+          <input
+            type="text"
+            id="image"
+            name="image"
+            value={defaultValues.image}
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+            required
+          />
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="image"
+          >
+          </div>
+        </div>
+
+        <!-- Especie relacionada -->
+        <div class="md:col-span-2">
+          <label
+            for="especieid"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Especie relacionada
+          </label>
+          <select
+            id="especieid"
+            name="especieid"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+          >
+            <option value="">Seleccionar especie...</option>
+            {
+              especiesList.map((especie) => (
+                <option
+                  value={especie.id}
+                  selected={defaultValues.especieid === especie.id}
+                >
+                  {especie.nombre}
+                </option>
+              ))
+            }
+          </select>
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="especieid"
+          >
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="md:col-span-2">
+          <label
+            for="description"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Descripción *
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            rows="4"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+            required>{defaultValues.description}</textarea
+          >
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="description"
+          >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Características y detalles adicionales -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        Características y Detalles
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Producto nuevo -->
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            id="isnew"
+            name="isnew"
+            checked={defaultValues.isnew}
+            class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          />
+          <label
+            for="isnew"
+            class="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+          >
+            Marcar como producto nuevo
+          </label>
+        </div>
+
+        <!-- Características -->
+        <div class="md:col-span-2">
+          <label
+            for="features"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Características (una por línea)
+          </label>
+          <textarea
+            id="features"
+            name="features"
+            rows="4"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+            >{defaultValues.features.join("\n")}</textarea
+          >
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="features"
+          >
+          </div>
+        </div>
+
+        <!-- Ingredientes -->
+        <div class="md:col-span-2">
+          <label
+            for="ingredients"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Ingredientes (uno por línea)
+          </label>
+          <textarea
+            id="ingredients"
+            name="ingredients"
+            rows="4"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+            >{defaultValues.ingredients.join("\n")}</textarea
+          >
+          <div
+            class="error-field text-red-500 text-xs mt-1 hidden"
+            data-field="ingredients"
+          >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="flex justify-end space-x-3">
+      <a
+        href="/admin/productos"
+        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+      >
+        Cancelar
+      </a>
+      <button
+        type="submit"
+        class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors flex items-center"
+        id="submit-button"
+      >
+        <span id="submit-text"
+          >{isEditing ? "Actualizar Producto" : "Crear Producto"}</span
+        >
+        <span id="submit-spinner" class="hidden ml-2">
+          <svg
+            class="animate-spin h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </form>
+
+  <!-- Notificaciones -->
+  <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+  </div>
+</div>
+
+<script>
+  import { saveProduct } from "../../stores/productStore";
+  import { ValidationError, DatabaseError } from "../../schemas/errors";
+
+  // Función para mostrar notificaciones temporales
+  function showNotification(
+    message: string,
+    type: "success" | "error" = "success"
+  ) {
+    const notificationsContainer = document.getElementById("notifications");
+    if (!notificationsContainer) return;
+
+    const notification = document.createElement("div");
+    notification.className = `p-4 rounded-md shadow-lg transform transition-all duration-500 ease-in-out ${
+      type === "success"
+        ? "bg-green-100 text-green-800 border-l-4 border-green-500"
+        : "bg-red-100 text-red-800 border-l-4 border-red-500"
+    }`;
+    notification.textContent = message;
+
+    notificationsContainer.appendChild(notification);
+
+    // Eliminar después de 5 segundos
+    setTimeout(() => {
+      notification.classList.add("opacity-0", "translate-x-full");
+      setTimeout(() => {
+        notification.remove();
+      }, 500);
+    }, 5000);
+  }
+
+  // Variables para evitar múltiples envíos
+  let isSubmitting = false;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById(
+      "product-form"
+    ) as HTMLFormElement | null;
+    const submitButton = document.getElementById(
+      "submit-button"
+    ) as HTMLButtonElement | null;
+    const submitText = document.getElementById("submit-text");
+    const submitSpinner = document.getElementById("submit-spinner");
+    const errorMessage = document.getElementById("error-message");
+    const errorText = document.getElementById("error-text");
+
+    // Verificar el select de especies y asegurar que valores vacíos sean manejados correctamente
+    const especieidSelect = document.getElementById(
+      "especieid"
+    ) as HTMLSelectElement;
+    if (especieidSelect) {
+      especieidSelect.addEventListener("change", function () {
+        const selectedValue = this.value;
+        // Para depuración
+        console.log("Especie seleccionada:", selectedValue);
+
+        // Si está vacío, asegurarse de que la opción vacía esté seleccionada
+        if (!selectedValue || selectedValue.trim() === "") {
+          this.value = "";
+        }
+      });
+    }
+
+    if (form) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Evitar múltiples envíos
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+        if (submitButton) submitButton.disabled = true;
+        if (submitText) submitText.classList.add("hidden");
+        if (submitSpinner) submitSpinner.classList.remove("hidden");
+
+        // Ocultar mensajes de error previos
+        if (errorMessage) errorMessage.classList.add("hidden");
+        document.querySelectorAll(".error-field").forEach((el) => {
+          el.classList.add("hidden");
+        });
+
+        try {
+          // Validar los campos obligatorios
+          const name = form.querySelector<HTMLInputElement>("#name")?.value;
+          const price = form.querySelector<HTMLInputElement>("#price")?.value;
+          const image = form.querySelector<HTMLInputElement>("#image")?.value;
+          const description =
+            form.querySelector<HTMLTextAreaElement>("#description")?.value;
+
+          if (!name || !price || !image || !description) {
+            throw new Error("Por favor complete todos los campos obligatorios");
+          }
+
+          // Recoger datos del formulario
+          const formData = new FormData(form);
+
+          // Manejar formData manualmente para evitar problemas de validación
+          const productToSave: any = {
+            id: formData.get("id")?.toString() || crypto.randomUUID(),
+            name: formData.get("name")?.toString() || "",
+            price: parseInt(formData.get("price")?.toString() || "0", 10),
+            discountprice: parseInt(
+              formData.get("discountprice")?.toString() || "0",
+              10
+            ),
+            image: formData.get("image")?.toString() || "",
+            description: formData.get("description")?.toString() || "",
+            category: formData.get("category")?.toString() || "",
+            stock: parseInt(formData.get("stock")?.toString() || "0", 10),
+            isnew: formData.get("isnew") === "on",
+            featured: formData.get("featured") === "on",
+            rating: parseFloat(formData.get("rating")?.toString() || "0"),
+            features: (formData.get("features")?.toString() || "")
+              .split("\n")
+              .filter((item) => item.trim() !== ""),
+            ingredients: (formData.get("ingredients")?.toString() || "")
+              .split("\n")
+              .filter((item) => item.trim() !== ""),
+          };
+
+          // Manejar especieid de forma especial
+          const especieidValue = formData.get("especieid")?.toString() || "";
+          if (especieidValue && especieidValue.trim() !== "") {
+            // Solo agregar el campo si tiene un valor válido
+            productToSave.especieid = especieidValue;
+          }
+
+          console.log("Producto a guardar:", productToSave);
+
+          // Guardar el producto
+          await saveProduct(productToSave);
+
+          // Mostrar notificación de éxito
+          showNotification("Producto guardado correctamente", "success");
+
+          // Redirigir después de un breve retraso
+          setTimeout(() => {
+            window.location.href = "/admin/productos";
+          }, 1000);
+        } catch (error) {
+          // Mostrar error
+          if (errorMessage) errorMessage.classList.remove("hidden");
+          let errorMsg = "Error desconocido";
+          if (error instanceof Error) {
+            errorMsg = error.message;
+          }
+          if (errorText) errorText.textContent = `Error: ${errorMsg}`;
+
+          // Mostrar notificación de error
+          showNotification(errorMsg, "error");
+          console.error("Error completo:", error);
+        } finally {
+          // Restablecer botón
+          if (submitButton) submitButton.disabled = false;
+          if (submitText) submitText.classList.remove("hidden");
+          if (submitSpinner) submitSpinner.classList.add("hidden");
+          isSubmitting = false;
+        }
+      });
+    }
+  });
+</script>

@@ -1,0 +1,615 @@
+import { getAllProducts } from "../../stores/productStore";
+import { getAllEspecies } from "../../stores/especiesStore";
+import { bulkInsertProducts, bulkUpdateProducts, bulkDeleteProducts, exportProducts } from '../../lib/bulkOperations.js';
+
+// Obtener todos los productos y especies
+const productos = await getAllProducts();
+const especies = await getAllEspecies();
+
+// Categorías disponibles
+const categorias = [
+  "Aceites esenciales",
+  "Cuidado de piel",
+  "Infusiones",
+  "Aromaterapia",
+  "Productos capilares",
+  "Suplementos",
+];
+
+<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+  <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
+    Gestión de Productos en Lote
+  </h2>
+
+  <!-- Operaciones por lotes -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+        Actualización Masiva
+      </h3>
+      <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+        <div class="mb-4">
+          <label
+            for="bulk-category"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Categoría a actualizar
+          </label>
+          <select
+            id="bulk-category"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
+          >
+            <option value="">Seleccionar categoría</option>
+            {
+              categorias.map((cat) => (
+                <option value={cat}>{cat}</option>
+              ))
+            }
+          </select>
+        </div>
+        <div class="mb-4">
+          <label
+            for="bulk-field"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Campo a actualizar
+          </label>
+          <select
+            id="bulk-field"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
+          >
+            <option value="">Seleccionar campo</option>
+            <option value="discountPrice">Precio de descuento</option>
+            <option value="stock">Stock</option>
+            <option value="isNew">Marcar como nuevo</option>
+            <option value="featured">Destacar producto</option>
+            <option value="especieid">Especie relacionada</option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label
+            for="bulk-value"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Nuevo valor
+          </label>
+          <input
+            type="text"
+            id="bulk-value"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
+            placeholder="Nuevo valor para el campo seleccionado"
+          />
+        </div>
+        <button
+          id="btn-bulk-update"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        >
+          Actualizar en lote
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+        Eliminar Productos
+      </h3>
+      <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+        <div class="mb-4">
+          <label
+            for="delete-condition"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Condición para eliminar
+          </label>
+          <select
+            id="delete-condition"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
+          >
+            <option value="">Seleccionar condición</option>
+            <option value="stock">Sin stock (stock = 0)</option>
+            <option value="category">Por categoría</option>
+            <option value="especie">Por especie</option>
+            <option value="selected">Selección manual</option>
+          </select>
+        </div>
+        <div id="condition-value-container" class="mb-4 hidden">
+          <label
+            for="condition-value"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Valor de la condición
+          </label>
+          <select
+            id="condition-value"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
+          >
+            <option value="">Seleccionar valor</option>
+          </select>
+        </div>
+        <button
+          id="btn-bulk-delete"
+          class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+        >
+          Eliminar productos
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Importación y exportación -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+        Importar Productos
+      </h3>
+      <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+        <div class="mb-4">
+          <label
+            for="import-file"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Archivo CSV/JSON
+          </label>
+          <input
+            type="file"
+            id="import-file"
+            accept=".csv, .json"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
+          />
+        </div>
+        <button
+          id="btn-import"
+          class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+        >
+          Importar productos
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+        Exportar Productos
+      </h3>
+      <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+        <div class="mb-4">
+          <label
+            for="export-format"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Formato de exportación
+          </label>
+          <select
+            id="export-format"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
+          >
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+          </select>
+        </div>
+        <button
+          id="btn-export"
+          class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
+        >
+          Exportar productos
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resultados y visualización -->
+  <div class="mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+      Vista previa de productos seleccionados
+    </h3>
+    <div
+      id="preview-container"
+      class="bg-gray-50 dark:bg-gray-700 p-4 rounded-md min-h-40 max-h-80 overflow-y-auto"
+    >
+      <p class="text-gray-500 dark:text-gray-400 text-center">
+        No hay productos seleccionados
+      </p>
+    </div>
+  </div>
+
+  <!-- Mensajes y notificaciones -->
+  <div
+    id="notification"
+    class="hidden bg-green-100 dark:bg-green-900 border-l-4 border-green-500 text-green-700 dark:text-green-200 p-4 rounded-md mb-6"
+  >
+    Operación completada con éxito.
+  </div>
+</div>
+
+<script>
+  // Cliente de Supabase solo para lectura (cliente normal)
+  import { supabase } from '../../lib/supabase.js';
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Referencias a elementos del DOM
+    const deleteCondition = document.getElementById("delete-condition");
+    const conditionValueContainer = document.getElementById("condition-value-container");
+    const conditionValue = document.getElementById("condition-value");
+    const bulkField = document.getElementById("bulk-field");
+    const bulkValue = document.getElementById("bulk-value");
+    const btnBulkUpdate = document.getElementById("btn-bulk-update");
+    const btnBulkDelete = document.getElementById("btn-bulk-delete");
+    const btnImport = document.getElementById("btn-import");
+    const btnExport = document.getElementById("btn-export");
+    const notification = document.getElementById("notification");
+    const previewContainer = document.getElementById("preview-container");
+
+    // Datos de productos y especies
+    const productos = JSON.parse(
+      document.getElementById("productos-data")?.textContent || "[]"
+    );
+    const especies = JSON.parse(
+      document.getElementById("especies-data")?.textContent || "[]"
+    );
+    const categorias = [
+      "Aceites esenciales",
+      "Cuidado de piel",
+      "Infusiones",
+      "Aromaterapia",
+      "Productos capilares",
+      "Suplementos",
+    ];
+
+    // Gestionar cambios en la condición de eliminación
+    if (deleteCondition) {
+      deleteCondition.addEventListener("change", () => {
+        if (!conditionValueContainer || !conditionValue) return;
+
+        // Limpiar opciones actuales
+        conditionValue.innerHTML = '<option value="">Seleccionar valor</option>';
+
+        const selectedCondition = deleteCondition.value;
+        if (!selectedCondition) {
+          conditionValueContainer.classList.add("hidden");
+          return;
+        }
+
+        conditionValueContainer.classList.remove("hidden");
+
+        // Cargar opciones según la condición seleccionada
+        if (selectedCondition === "category") {
+          categorias.forEach((cat) => {
+            const option = document.createElement("option");
+            option.value = cat;
+            option.textContent = cat;
+            conditionValue.appendChild(option);
+          });
+        } else if (selectedCondition === "especie") {
+          especies.forEach((especie) => {
+            const option = document.createElement("option");
+            option.value = especie.id;
+            option.textContent = especie.nombre;
+            conditionValue.appendChild(option);
+          });
+        } else if (selectedCondition === "selected") {
+          // Mostrar lista de productos para selección
+          updatePreview(productos);
+        } else {
+          conditionValueContainer.classList.add("hidden");
+        }
+      });
+    }
+
+    // Gestionar cambio en el campo a actualizar
+    if (bulkField) {
+      bulkField.addEventListener("change", () => {
+        if (!bulkValue) return;
+
+        const field = bulkField.value;
+        bulkValue.type = "text";
+
+        if (field === "isNew" || field === "featured") {
+          bulkValue.type = "checkbox";
+        } else if (field === "especieid") {
+          // Mostrar un select con las especies disponibles
+          const select = document.createElement("select");
+          select.id = "bulk-value";
+          select.className = bulkValue.className;
+          
+          const defaultOption = document.createElement("option");
+          defaultOption.value = "";
+          defaultOption.textContent = "Seleccionar especie";
+          select.appendChild(defaultOption);
+          
+          especies.forEach((especie) => {
+            const option = document.createElement("option");
+            option.value = especie.id;
+            option.textContent = especie.nombre;
+            select.appendChild(option);
+          });
+          
+          bulkValue.parentNode.replaceChild(select, bulkValue);
+        }
+      });
+    }
+
+    // Función para actualizar vista previa
+    function updatePreview(items) {
+      if (!previewContainer) return;
+      
+      if (!items || items.length === 0) {
+        previewContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center">No hay productos seleccionados</p>';
+        return;
+      }
+      
+      let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+      items.forEach((item) => {
+        html += `
+          <div class="flex items-center border border-gray-200 dark:border-gray-600 p-3 rounded-md">
+            <input type="checkbox" class="product-checkbox mr-3" value="${item.id}">
+            <div class="flex-1">
+              <h4 class="font-medium">${item.name}</h4>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                ${item.category} - $${item.price.toLocaleString()} - Stock: ${item.stock || 0}
+              </p>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      previewContainer.innerHTML = html;
+    }
+
+    // Función para mostrar notificación
+    function showNotification(message, isSuccess = true) {
+      if (!notification) return;
+      
+      notification.textContent = message;
+      notification.className = isSuccess
+        ? "bg-green-100 dark:bg-green-900 border-l-4 border-green-500 text-green-700 dark:text-green-200 p-4 rounded-md mb-6"
+        : "bg-red-100 dark:bg-red-900 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-4 rounded-md mb-6";
+      
+      notification.classList.remove("hidden");
+      
+      setTimeout(() => {
+        notification.classList.add("hidden");
+      }, 5000);
+    }
+
+    // Evento para actualización masiva
+    if (btnBulkUpdate) {
+      btnBulkUpdate.addEventListener("click", async () => {
+        const category = document.getElementById("bulk-category")?.value;
+        const field = bulkField?.value;
+        let value = bulkValue?.value;
+        
+        if (!category || !field || !value) {
+          showNotification("Por favor complete todos los campos", false);
+          return;
+        }
+        
+        // Convertir valores según el tipo de campo
+        if (field === "stock" || field === "discountPrice") {
+          value = parseInt(value) || 0;
+        } else if (field === "isNew" || field === "featured") {
+          value = bulkValue.checked;
+        }
+        
+        try {
+          // Filtrar productos por categoría
+          const productsToUpdate = productos
+            .filter(p => p.category === category)
+            .map(p => ({
+              id: p.id,
+              [field]: value
+            }));
+          
+          if (productsToUpdate.length === 0) {
+            showNotification("No hay productos en esta categoría para actualizar", false);
+            return;
+          }
+          
+          updatePreview(productsToUpdate.map(p => {
+            const original = productos.find(op => op.id === p.id);
+            return { ...original, [field]: value };
+          }));
+          
+          await bulkUpdateProducts(productsToUpdate);
+          showNotification(`${productsToUpdate.length} productos actualizados correctamente`);
+        } catch (error) {
+          showNotification(`Error: ${error.message}`, false);
+        }
+      });
+    }
+
+    // Evento para eliminar en lote
+    if (btnBulkDelete) {
+      btnBulkDelete.addEventListener("click", async () => {
+        try {
+          const condition = deleteCondition?.value;
+          if (!condition) {
+            showNotification("Seleccione una condición para eliminar", false);
+            return;
+          }
+          
+          let productsToDelete = [];
+          
+          if (condition === "stock") {
+            productsToDelete = productos.filter(p => !p.stock || p.stock === 0);
+          } else if (condition === "category") {
+            const categoryValue = conditionValue?.value;
+            if (!categoryValue) {
+              showNotification("Seleccione una categoría", false);
+              return;
+            }
+            productsToDelete = productos.filter(p => p.category === categoryValue);
+          } else if (condition === "especie") {
+            const especieId = conditionValue?.value;
+            if (!especieId) {
+              showNotification("Seleccione una especie", false);
+              return;
+            }
+            productsToDelete = productos.filter(p => p.especieid === especieId);
+          } else if (condition === "selected") {
+            const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+            if (checkboxes.length === 0) {
+              showNotification("Seleccione al menos un producto", false);
+              return;
+            }
+            
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+            productsToDelete = productos.filter(p => selectedIds.includes(p.id));
+          }
+          
+          if (productsToDelete.length === 0) {
+            showNotification("No hay productos que cumplan con la condición", false);
+            return;
+          }
+          
+          if (!confirm(`¿Está seguro de eliminar ${productsToDelete.length} productos? Esta acción no se puede deshacer.`)) {
+            return;
+          }
+          
+          const productIds = productsToDelete.map(p => p.id);
+          await bulkDeleteProducts(productIds);
+          showNotification(`${productIds.length} productos eliminados correctamente`);
+          
+          // Actualizar vista previa
+          updatePreview([]);
+        } catch (error) {
+          showNotification(`Error: ${error.message}`, false);
+        }
+      });
+    }
+
+    // Evento para importar productos
+    if (btnImport) {
+      btnImport.addEventListener("click", async () => {
+        const fileInput = document.getElementById("import-file");
+        const file = fileInput?.files?.[0];
+        
+        if (!file) {
+          showNotification("Seleccione un archivo para importar", false);
+          return;
+        }
+        
+        try {
+          const reader = new FileReader();
+          
+          reader.onload = async (e) => {
+            try {
+              let productsToImport = [];
+              
+              if (file.name.endsWith('.csv')) {
+                // Procesar CSV
+                const csvData = e.target.result;
+                const lines = csvData.split('\n');
+                const headers = lines[0].split(',');
+                
+                for (let i = 1; i < lines.length; i++) {
+                  if (!lines[i].trim()) continue;
+                  
+                  const values = lines[i].split(',');
+                  const product = {};
+                  
+                  headers.forEach((header, index) => {
+                    product[header.trim()] = values[index]?.trim() || '';
+                    
+                    // Convertir valores
+                    if (['price', 'discountPrice', 'stock'].includes(header.trim())) {
+                      product[header.trim()] = parseInt(product[header.trim()]) || 0;
+                    } else if (['isNew', 'featured'].includes(header.trim())) {
+                      product[header.trim()] = product[header.trim()].toLowerCase() === 'true';
+                    }
+                  });
+                  
+                  productsToImport.push(product);
+                }
+              } else if (file.name.endsWith('.json')) {
+                // Procesar JSON
+                productsToImport = JSON.parse(e.target.result);
+              }
+              
+              if (productsToImport.length === 0) {
+                showNotification("No hay productos válidos para importar", false);
+                return;
+              }
+              
+              await bulkInsertProducts(productsToImport);
+              showNotification(`${productsToImport.length} productos importados correctamente`);
+              
+              // Actualizar vista previa
+              updatePreview(productsToImport);
+            } catch (error) {
+              showNotification(`Error al procesar el archivo: ${error.message}`, false);
+            }
+          };
+          
+          if (file.name.endsWith('.csv')) {
+            reader.readAsText(file);
+          } else if (file.name.endsWith('.json')) {
+            reader.readAsText(file);
+          } else {
+            showNotification("Formato de archivo no soportado. Use CSV o JSON", false);
+          }
+        } catch (error) {
+          showNotification(`Error: ${error.message}`, false);
+        }
+      });
+    }
+
+    // Evento para exportar productos
+    if (btnExport) {
+      btnExport.addEventListener("click", () => {
+        const format = document.getElementById("export-format")?.value || "csv";
+        
+        try {
+          let data;
+          let fileName;
+          let contentType;
+          
+          if (format === "csv") {
+            // Generar CSV
+            const headers = Object.keys(productos[0] || {}).join(',');
+            const rows = productos.map(product => {
+              return Object.values(product).map(val => {
+                if (typeof val === 'object') {
+                  return `"${JSON.stringify(val).replace(/"/g, '""')}"`;
+                }
+                return `"${val}"`;
+              }).join(',');
+            });
+            
+            data = [headers, ...rows].join('\n');
+            fileName = "productos.csv";
+            contentType = "text/csv";
+          } else {
+            // Generar JSON
+            data = JSON.stringify(productos, null, 2);
+            fileName = "productos.json";
+            contentType = "application/json";
+          }
+          
+          // Crear blob y descargar
+          const blob = new Blob([data], { type: contentType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          
+          showNotification(`Exportación de ${productos.length} productos completada`);
+        } catch (error) {
+          showNotification(`Error al exportar: ${error.message}`, false);
+        }
+      });
+    }
+  });
+</script>
+
+<!-- Datos para JavaScript -->
+<script id="productos-data" type="application/json">
+  {JSON.stringify(productos)}
+</script>
+
+<script id="especies-data" type="application/json">
+  {JSON.stringify(especies)}
+</script> 

@@ -1,0 +1,570 @@
+---
+// No se necesitan props para este componente
+
+import {
+  supabase,
+  testSupabaseConnection,
+  connectionState,
+} from "../../lib/supabase";
+import { isAuthenticated } from "../../stores/authStore";
+
+let errorMessage = "";
+let loadingState = false;
+
+// Comprobar si hay un error de conexión a Supabase
+let connectionError = null;
+let retryCount = 0;
+
+// Funciones auxiliares para manejar la lógica del componente
+async function checkConnection() {
+  try {
+    const connectionStatus = await testSupabaseConnection();
+    if (!connectionStatus.success) {
+      connectionError = connectionStatus.error;
+      retryCount = connectionState.retryCount;
+    }
+    return connectionStatus;
+  } catch (err) {
+    console.error("Error al verificar conexión inicial:", err);
+    return { success: false, error: err };
+  }
+}
+
+// Verificar la conexión a Supabase al cargar la página
+if (Astro.request.method === "GET") {
+  await checkConnection();
+}
+
+// Verificar si hay un envío del formulario
+if (Astro.request.method === "POST") {
+  loadingState = true;
+  try {
+    const formData = await Astro.request.formData();
+    const email = formData.get("email")?.toString() || "";
+    const password = formData.get("password")?.toString() || "";
+
+    // Verificar primero si hay conexión a Supabase
+    const connectionStatus = await testSupabaseConnection();
+    if (!connectionStatus.success) {
+      throw new Error(
+        `Error de conexión: No se puede conectar con Supabase. ${(connectionStatus.error as Error)?.message || ""}`
+      );
+    }
+
+    // Si hay conexión, intentar el inicio de sesión
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    // Si llegamos aquí, la autenticación fue exitosa
+    isAuthenticated.set(true);
+    return Astro.redirect("/admin/dashboard");
+  } catch (error) {
+    console.error("Error en inicio de sesión:", error);
+    if (typeof error === "object" && error !== null) {
+      if (
+        "message" in error &&
+        typeof (error as { message: unknown }).message === "string" &&
+        (error as { message: string }).message.includes("fetch failed")
+      ) {
+        errorMessage =
+          "Error de conexión: No se pudo conectar con el servidor de Supabase. Por favor, verifica tu conexión a internet o inténtalo de nuevo más tarde.";
+      } else if (
+        "message" in error &&
+        typeof (error as { message: unknown }).message === "string"
+      ) {
+        const errorMsg = (error as { message: string }).message;
+        if (errorMsg.includes("Invalid login credentials")) {
+          errorMessage =
+            "Credenciales inválidas: El correo electrónico o la contraseña son incorrectos.";
+        } else if (errorMsg.includes("Error de conexión")) {
+          errorMessage = errorMsg;
+        } else {
+          errorMessage = `Error: ${errorMsg}`;
+        }
+      } else {
+        errorMessage = "Error desconocido al iniciar sesión.";
+      }
+    } else {
+      errorMessage = "Error desconocido al iniciar sesión.";
+    }
+  } finally {
+    loadingState = false;
+  }
+}
+---
+
+<div
+  class="max-w-md w-full mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md"
+>
+  <div class="text-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+      Iniciar Sesión
+    </h2>
+    <p class="text-gray-600 dark:text-gray-400 mt-1">
+      Panel de Administración JAMUCHEE
+    </p>
+  </div>
+
+  {
+    connectionError && (
+      <div
+        class="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 mb-4"
+        role="alert"
+      >
+        <p class="font-bold">Advertencia de conexión</p>
+        <p>
+          Detectamos problemas para conectar con el servidor de Supabase.
+          {connectionState.retryCount > 0 && (
+            <span>
+              Intentos de reconexión: {connectionState.retryCount} de 3
+            </span>
+          )}
+        </p>
+        <button
+          id="retry-connection"
+          class="mt-2 bg-amber-500 hover:bg-amber-600 text-white py-1 px-3 rounded text-sm"
+        >
+          Probar conexión
+        </button>
+      </div>
+    )
+  }
+
+  {
+    errorMessage && (
+      <div
+        class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4"
+        role="alert"
+      >
+        <p id="error-message-text">{errorMessage}</p>
+      </div>
+    )
+  }
+
+  <form id="login-form" class="space-y-6">
+    <div>
+      <label
+        for="email"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        Correo electrónico
+      </label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+        required
+      />
+    </div>
+
+    <div>
+      <label
+        for="password"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        Contraseña
+      </label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+        required
+      />
+    </div>
+
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <input
+          id="remember-me"
+          name="remember-me"
+          type="checkbox"
+          class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:border-gray-600 dark:bg-gray-800"
+        />
+        <label
+          for="remember-me"
+          class="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+        >
+          Recordarme
+        </label>
+      </div>
+
+      <div class="text-sm">
+        <a
+          href="#"
+          class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+        >
+          ¿Olvidó su contraseña?
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <button
+        type="submit"
+        id="login-button"
+        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+        disabled={loadingState}
+      >
+        <span id="login-text">Iniciar sesión</span>
+        <span id="login-spinner" class={loadingState ? "" : "hidden"}>
+          <svg
+            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          Procesando...
+        </span>
+      </button>
+    </div>
+  </form>
+
+  <div
+    class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6 text-center"
+  >
+    <p class="text-sm text-gray-600 dark:text-gray-400">
+      © {new Date().getFullYear()} JAMUCHEE - Todos los derechos reservados
+    </p>
+  </div>
+</div>
+
+<script>
+  import { login, authError, isAuthenticated } from "../../stores/authStore";
+  import {
+    supabase,
+    testSupabaseConnection,
+    connectionState,
+  } from "../../lib/supabase";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("login-form");
+    const errorDiv = document.getElementById("error-message");
+    const errorText = document.getElementById("error-text");
+    const loginButton = document.getElementById("login-button");
+    const loginText = document.getElementById("login-text");
+    const loginSpinner = document.getElementById("login-spinner");
+
+    // Determinar si estamos en desarrollo
+    const isDev = import.meta.env.MODE === "development";
+    console.log(`Modo: ${isDev ? "desarrollo" : "producción"}`);
+
+    // Mostrar mensajes de depuración en la consola
+    console.log("LoginForm inicializado");
+
+    // Comprobar si ya está autenticado
+    if (!isDev) {
+      supabase.auth.getSession().then(({ data }) => {
+        console.log(
+          "Estado de sesión actual:",
+          data.session ? "Autenticado" : "No autenticado"
+        );
+      });
+    }
+
+    if (
+      form &&
+      errorDiv &&
+      errorText &&
+      loginButton &&
+      loginText &&
+      loginSpinner
+    ) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        console.log("Formulario enviado");
+
+        // Obtener valores del formulario
+        const emailElement = document.getElementById(
+          "email"
+        ) as HTMLInputElement;
+        const passwordElement = document.getElementById(
+          "password"
+        ) as HTMLInputElement;
+
+        if (!emailElement || !passwordElement) {
+          showError("Por favor, complete todos los campos");
+          return;
+        }
+
+        const email = emailElement.value || "";
+        const password = passwordElement.value || "";
+
+        console.log(`Intentando iniciar sesión con email: ${email}`);
+
+        // Mostrar spinner
+        loginText.classList.add("hidden");
+        loginSpinner.classList.remove("hidden");
+        (loginButton as HTMLButtonElement).disabled = true;
+
+        try {
+          // En modo desarrollo, autenticar con credenciales fijas
+          if (
+            isDev &&
+            email === "admin@jamuchee.com" &&
+            password === "admin123"
+          ) {
+            console.log(
+              "Modo desarrollo: autenticación exitosa con credenciales locales"
+            );
+
+            // Establecer datos en localStorage para persistir la sesión
+            typeof window !== "undefined" && localStorage.setItem("devModeAuth", "true");
+
+            // Actualizar el estado global
+            isAuthenticated.set(true);
+
+            // Redireccionar después de un breve delay
+            setTimeout(() => {
+              window.location.href = "/admin/dashboard";
+            }, 1000);
+
+            return;
+          }
+
+          // Verificar que las variables de entorno estén definidas
+          if (
+            !import.meta.env.PUBLIC_SUPABASE_URL ||
+            !import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+          ) {
+            console.error(
+              "Error: Variables de entorno de Supabase no configuradas"
+            );
+            showError(
+              "Error de configuración: Credenciales de API no disponibles"
+            );
+            return;
+          }
+
+          // Verificar conexión antes de intentar iniciar sesión
+          const connectionCheck = await testSupabaseConnection();
+          if (!connectionCheck.success) {
+            console.error(
+              "Error de conexión a Supabase:",
+              connectionCheck.error
+            );
+            showError(
+              "No se pudo conectar a la base de datos. Verifica tu conexión a internet."
+            );
+            return;
+          }
+
+          // Usar directamente la API de Supabase para mayor claridad
+          console.log("Llamando a Supabase auth.signInWithPassword");
+          try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+
+            if (error) {
+              console.error("Error de Supabase:", error);
+              throw error;
+            }
+
+            console.log("Respuesta de Supabase:", data);
+
+            if (data.user) {
+              console.log("Usuario autenticado:", data.user);
+
+              // Limpiar los flags de redirección
+              sessionStorage.removeItem("admin_redirection_attempted");
+              sessionStorage.removeItem("dashboard_redirection_attempted");
+
+              // Actualizar el store manualmente para asegurar coherencia
+              isAuthenticated.set(true);
+
+              // Esperar un poco para asegurar que los stores se actualizan
+              setTimeout(() => {
+                console.log("Redirigiendo al dashboard...");
+                window.location.href = "/admin/dashboard";
+              }, 1000); // Aumentar el tiempo de espera para asegurar que todo se actualiza
+            } else {
+              showError(
+                "No se pudo iniciar sesión. Datos de usuario no disponibles."
+              );
+            }
+          } catch (supabaseError) {
+            console.error("Error detallado de Supabase:", supabaseError);
+            throw supabaseError;
+          }
+        } catch (error: unknown) {
+          console.error(
+            "Tipo de error:",
+            error instanceof Error ? error.constructor.name : typeof error
+          );
+          console.error("Error completo:", error);
+
+          let errorMessage = "Error desconocido";
+
+          if (error instanceof Error) {
+            errorMessage = error.message;
+          } else if (
+            typeof error === "object" &&
+            error !== null &&
+            "message" in error &&
+            error.message === "Failed to fetch"
+          ) {
+            errorMessage =
+              "Error de conexión: No se pudo conectar al servidor. Verifica tu conexión a internet o inténtalo más tarde.";
+          }
+
+          showError("Error al iniciar sesión: " + errorMessage);
+        } finally {
+          // Ocultar spinner
+          loginText.classList.remove("hidden");
+          loginSpinner.classList.add("hidden");
+          (loginButton as HTMLButtonElement).disabled = false;
+        }
+      });
+    }
+
+    function showError(message: string): void {
+      console.error("Mensaje de error:", message);
+      if (errorDiv && errorText) {
+        errorText.textContent = message;
+        errorDiv.classList.remove("hidden");
+      }
+    }
+
+    // Verificar la conexión a Supabase al cargar la página
+    async function checkSupabaseConnection() {
+      // En modo desarrollo, omitir la verificación de conexión
+      if (isDev) {
+        console.log("Modo desarrollo: omitiendo verificación de conexión");
+        return;
+      }
+
+      try {
+        const { success, error } = await testSupabaseConnection();
+        if (!success) {
+          console.error("Error al verificar la conexión con Supabase:", error);
+          showError(
+            "No se pudo conectar a la base de datos. Verifica tu conexión a internet."
+          );
+        } else {
+          console.log("Conexión con Supabase establecida correctamente");
+        }
+      } catch (err) {
+        console.error("Error al verificar la conexión:", err);
+      }
+    }
+
+    // Verificar la conexión al cargar la página
+    window.addEventListener("DOMContentLoaded", checkSupabaseConnection);
+
+    // Función para actualizar el estado de la conexión en la UI
+    async function updateConnectionStatus() {
+      const statusText = document.getElementById("status-text");
+      const connectionStatusDiv = document.getElementById("connection-status");
+
+      if (statusText && connectionStatusDiv) {
+        try {
+          statusText.textContent = "Verificando...";
+
+          const result = await testSupabaseConnection();
+
+          if (result.success) {
+            statusText.textContent = "Conectado";
+            statusText.className =
+              "font-medium text-green-600 dark:text-green-400";
+
+            // Ocultar mensaje de advertencia si existe
+            const warningAlert = document.querySelector(".bg-amber-100");
+            if (warningAlert) {
+              warningAlert.classList.add("hidden");
+            }
+
+            // Quitar mensaje de error si es un error de conexión
+            const errorText = document.getElementById("error-message-text");
+            if (
+              errorText &&
+              errorText.textContent &&
+              errorText.textContent.includes("Error de conexión")
+            ) {
+              const errorDiv = errorText.closest(".bg-red-100");
+              if (errorDiv) {
+                errorDiv.classList.add("hidden");
+              }
+            }
+          } else {
+            statusText.textContent = `Desconectado (Reintentos: ${connectionState.retryCount}/3)`;
+            statusText.className = "font-medium text-red-600 dark:text-red-400";
+
+            // Mostrar mensaje de advertencia
+            const warningAlert = document.querySelector(".bg-amber-100");
+            if (warningAlert) {
+              warningAlert.classList.remove("hidden");
+            }
+          }
+        } catch (error) {
+          statusText.textContent = "Error al verificar conexión";
+          statusText.className = "font-medium text-red-600 dark:text-red-400";
+        }
+      }
+    }
+
+    // Verificar estado de conexión cuando la página carga
+    document.addEventListener("DOMContentLoaded", () => {
+      // Inicializar estado de conexión
+      updateConnectionStatus();
+
+      // Agregar evento al botón de prueba de conexión
+      const retryButton = document.getElementById(
+        "retry-connection"
+      ) as HTMLButtonElement;
+      if (retryButton) {
+        retryButton.addEventListener("click", async (e) => {
+          e.preventDefault();
+
+          // Cambiar el texto del botón
+          retryButton.textContent = "Verificando...";
+          retryButton.disabled = true;
+
+          // Intentar reconexión
+          await updateConnectionStatus();
+
+          // Restablecer botón
+          retryButton.textContent = "Probar conexión";
+          retryButton.disabled = false;
+        });
+      }
+
+      // Crear enlace a página de diagnóstico
+      const connectionStatusDiv = document.getElementById("connection-status");
+      if (connectionStatusDiv) {
+        const diagnosticLink = document.createElement("div");
+        diagnosticLink.className = "mt-2";
+        diagnosticLink.innerHTML = `
+          <a href="/admin/diagnostico" class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline">
+            Ver herramientas de diagnóstico
+          </a>
+        `;
+        connectionStatusDiv.appendChild(diagnosticLink);
+      }
+
+      // Verificar periódicamente el estado de la conexión
+      setInterval(updateConnectionStatus, 30000); // Cada 30 segundos
+    });
+  });
+</script>

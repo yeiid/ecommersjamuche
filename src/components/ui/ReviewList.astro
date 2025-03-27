@@ -1,0 +1,125 @@
+---
+// Componente para mostrar la lista de reseñas de un producto
+interface Props {
+  productId: string;
+}
+
+const { productId } = Astro.props;
+---
+
+<div class="reviews-container mt-8">
+  <h3 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+    Reseñas de clientes
+  </h3>
+
+  <div id="reviews-list">
+    <!-- Aquí se cargarán dinámicamente las reseñas -->
+    <div
+      class="text-center py-8 text-gray-500 dark:text-gray-400"
+      id="no-reviews"
+    >
+      <p>Este producto aún no tiene reseñas.</p>
+      <p class="mt-2">¡Sé el primero en compartir tu experiencia!</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import {
+    getProductReviews,
+    getAverageRating,
+  } from "../../stores/reviewsStore";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const productId = document
+      .getElementById("review-section")
+      ?.getAttribute("data-product-id");
+    const reviewsList = document.getElementById("reviews-list");
+    const noReviewsMessage = document.getElementById("no-reviews");
+
+    if (!productId || !reviewsList) return;
+
+    // Obtener las reseñas
+    const reviews = getProductReviews(productId);
+
+    // Actualizar rating promedio si existe el elemento
+    const avgRatingElement = document.getElementById("avg-rating");
+    if (avgRatingElement) {
+      const avgRating = getAverageRating(productId);
+      avgRatingElement.textContent = avgRating.toFixed(1);
+    }
+
+    // Si no hay reseñas, mostrar mensaje
+    if (reviews.length === 0) {
+      if (noReviewsMessage) noReviewsMessage.classList.remove("hidden");
+      return;
+    }
+
+    // Ocultar mensaje de no reseñas
+    if (noReviewsMessage) noReviewsMessage.classList.add("hidden");
+
+    // Formatear fecha
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat("es-ES", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(date);
+    };
+
+    // Generar estrellas HTML
+    const generateStars = (rating) => {
+      let starsHtml = "";
+      for (let i = 1; i <= 5; i++) {
+        if (i <= rating) {
+          starsHtml += `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          `;
+        } else {
+          starsHtml += `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300 dark:text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          `;
+        }
+      }
+      return starsHtml;
+    };
+
+    // Renderizar las reseñas
+    let reviewsHtml = "";
+
+    // Ordenar reseñas por fecha (más recientes primero)
+    const sortedReviews = [...reviews].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    sortedReviews.forEach((review) => {
+      reviewsHtml += `
+        <div class="review bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-4">
+          <div class="flex items-start justify-between">
+            <div>
+              <h4 class="font-semibold text-gray-800 dark:text-white">${review.author}</h4>
+              <div class="flex items-center mt-1">
+                <div class="flex">
+                  ${generateStars(review.rating)}
+                </div>
+                <span class="ml-2 text-gray-500 dark:text-gray-400 text-sm">${formatDate(review.date)}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-3 text-gray-700 dark:text-gray-300">
+            ${review.comment}
+          </div>
+        </div>
+      `;
+    });
+
+    reviewsList.innerHTML = reviewsHtml;
+  });
+</script>
+

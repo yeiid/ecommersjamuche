@@ -1,0 +1,222 @@
+---
+import { isAuthenticated } from "../../stores/authStore";
+import AdminSidebar from "./AdminSidebar.astro";
+import "../../styles/globals.css";
+---
+
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Panel de Administración JAMUCHEE" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <title>Admin JAMUCHEE</title>
+  </head>
+  <body
+    class="h-full bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100"
+  >
+    <div class="flex h-full">
+      <AdminSidebar />
+
+      <div class="flex-1 flex flex-col h-full overflow-auto">
+        <header
+          class="bg-white dark:bg-gray-800 shadow-md p-4 flex items-center justify-between"
+        >
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">
+            Panel de Administración
+          </h1>
+
+          <div class="flex items-center space-x-4">
+            <div class="relative">
+              <button
+                id="notifications-btn"
+                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+                aria-label="Notificaciones"
+              >
+                <span
+                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                  >3</span
+                >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white"
+              >
+                A
+              </div>
+              <span
+                class="font-medium text-gray-700 dark:text-gray-300 hidden md:inline-block"
+                >Administrador</span
+              >
+            </div>
+
+            <button
+              id="logout-btn"
+              class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm font-medium transition-colors"
+            >
+              Salir
+            </button>
+          </div>
+        </header>
+
+        <main class="flex-1 p-6 overflow-auto">
+          <!-- Contenido principal -->
+          <slot />
+        </main>
+
+        <footer
+          class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-4 px-6 text-center text-sm text-gray-600 dark:text-gray-400"
+        >
+          © {new Date().getFullYear()} JAMUCHEE - Panel de Administración
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  import { logout, isAuthenticated } from "../../stores/authStore";
+  import { supabase } from "../../lib/supabase";
+
+  // Determinar si estamos en desarrollo
+  const isDev = import.meta.env.MODE === "development";
+
+  // Verificar token de desarrollo
+  const devModeAuth = typeof window !== "undefined" && localStorage.getItem("devModeAuth");
+
+  // Evitar redirecciones múltiples
+  const PERSISTENCE_KEY = "jamuchee_admin_auth";
+  const SESSION_CHECK_KEY = "session_checked";
+
+  // Verificar si ya hemos comprobado la sesión en esta navegación
+  const alreadyChecked = sessionStorage.getItem(SESSION_CHECK_KEY) === "true";
+
+  // Función para guardar el estado de autenticación de forma persistente
+  function saveAuthState(isAuth: boolean) {
+    if (isAuth) {
+      localStorage.setItem(PERSISTENCE_KEY, "true");
+    } else {
+      localStorage.removeItem(PERSISTENCE_KEY);
+    }
+  }
+
+  // Marcar que ya se ha verificado la sesión
+  function markSessionChecked() {
+    sessionStorage.setItem(SESSION_CHECK_KEY, "true");
+  }
+
+  // Función para verificar autenticación
+  async function checkAuthentication() {
+    try {
+      // Si es modo desarrollo y hay token local, consideramos autenticado
+      if (isDev && devModeAuth === "true") {
+        console.log("Auth [DEV]: Token local encontrado");
+        isAuthenticated.set(true);
+        saveAuthState(true);
+        return true;
+      }
+
+      // Consultar directamente a Supabase
+      const { data } = await supabase.auth.getSession();
+      const authenticated = !!data.session;
+
+      console.log(
+        "Auth: Estado de sesión según Supabase:",
+        authenticated ? "Autenticado" : "No autenticado"
+      );
+
+      // Actualizar estado y almacenar
+      isAuthenticated.set(authenticated);
+      saveAuthState(authenticated);
+
+      // Si no está autenticado y no estamos en la página de login
+      if (!authenticated && window.location.pathname !== "/admin") {
+        console.log("Auth: No autenticado, redirigiendo a login");
+        window.location.href = "/admin";
+        return false;
+      }
+
+      return authenticated;
+    } catch (error) {
+      console.error("Error al verificar autenticación:", error);
+
+      // En caso de error, confiamos en el estado local si existe
+      const localAuth = typeof window !== "undefined" && localStorage.getItem(PERSISTENCE_KEY) === "true";
+      isAuthenticated.set(localAuth);
+
+      // Solo redirigir si sabemos con certeza que no está autenticado
+      if (!localAuth && window.location.pathname !== "/admin") {
+        window.location.href = "/admin";
+      }
+
+      return localAuth;
+    }
+  }
+
+  // Verificar autenticación SOLO si no lo hemos hecho ya en esta navegación
+  if (!alreadyChecked) {
+    console.log("AdminLayout: Verificando autenticación...");
+    checkAuthentication().then(() => {
+      markSessionChecked();
+    });
+  } else {
+    console.log("AdminLayout: Sesión ya verificada anteriormente");
+
+    // Utilizar estado local si no verificamos con Supabase
+    const localAuth = typeof window !== "undefined" && localStorage.getItem(PERSISTENCE_KEY) === "true";
+    isAuthenticated.set(localAuth);
+
+    // Si no hay autenticación local y no estamos en login, redirigir
+    if (!localAuth && window.location.pathname !== "/admin") {
+      window.location.href = "/admin";
+    }
+  }
+
+  // Manejar cierre de sesión
+  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+    console.log("Cerrando sesión...");
+
+    // En modo desarrollo
+    if (isDev) {
+      localStorage.removeItem("devModeAuth");
+    }
+
+    // Limpiar estado guardado y sesión
+    localStorage.removeItem(PERSISTENCE_KEY);
+    sessionStorage.removeItem(SESSION_CHECK_KEY);
+    isAuthenticated.set(false);
+
+    // Cerrar sesión en Supabase
+    await logout();
+    window.location.href = "/admin";
+  });
+</script>
+
+<style>
+  /* Estilos globales para el panel administrativo */
+  body {
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+  }
+</style>

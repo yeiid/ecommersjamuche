@@ -1,0 +1,134 @@
+---
+import LoginForm from "../../components/admin/LoginForm.astro";
+import "../../styles/globals.css";
+import { supabase } from "../../lib/supabase";
+
+// Añadir la directiva para renderizar en el servidor
+export const prerender = false;
+
+// Determinar modo de desarrollo
+const isDevelopment = import.meta.env.MODE === "development";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login | JAMUCHEE</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body
+    class="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center"
+  >
+    <div
+      class="max-w-md w-full p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md"
+    >
+      <div class="text-center mb-8">
+        <a href="/" class="inline-block">
+          <img src="/logo.svg" alt="JAMUCHEE" class="h-12 mx-auto mb-2" />
+        </a>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+          Panel Administrativo
+        </h1>
+        <p class="text-gray-600 dark:text-gray-300 mt-2">
+          Ingresa tus credenciales para acceder
+        </p>
+      </div>
+
+      {
+        isDevelopment && (
+          <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4">
+            <p>
+              <strong>Modo desarrollo:</strong> Usa estas credenciales para
+              pruebas locales:
+            </p>
+            <p class="mt-1">
+              Email:{" "}
+              <>
+                <code>admin@jamuchee.com</code>
+                <br />
+              </>
+              Contraseña: <code>admin123</code>
+            </p>
+          </div>
+        )
+      }
+
+      <LoginForm />
+
+      <div class="text-center mt-6">
+        <a
+          href="/"
+          class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300"
+        >
+          Volver a la tienda
+        </a>
+      </div>
+    </div>
+
+    <script>
+      // Verificar si hay una sesión activa
+      import { supabase } from "../../lib/supabase";
+      import { isAuthenticated } from "../../stores/authStore";
+
+      if (typeof window !== "undefined") {
+        // Limpiar todos los indicadores de sesión y redirección
+        sessionStorage.removeItem("admin_redirection_attempted");
+        sessionStorage.removeItem("dashboard_redirection_attempted");
+        sessionStorage.removeItem("devModeAuth");
+
+        // Verificar si hay un token de desarrollo en localStorage
+        const devModeAuth = localStorage.getItem("devModeAuth");
+        const isDev = import.meta.env.MODE === "development";
+
+        // Para modo desarrollo, permitir acceso sin Supabase
+        if (isDev && devModeAuth === "true") {
+          console.log("Modo desarrollo: usando autenticación local");
+          isAuthenticated.set(true);
+          window.location.href = "/admin/dashboard";
+        } else {
+          // En producción o sin token dev, verificar con Supabase
+          console.log("Verificando sesión con Supabase");
+
+          supabase.auth
+            .getSession()
+            .then(({ data: { session } }) => {
+              if (session) {
+                console.log(
+                  "Sesión activa detectada, redirigiendo al dashboard"
+                );
+                window.location.href = "/admin/dashboard";
+              } else {
+                console.log(
+                  "No hay sesión activa, mostrando formulario de login"
+                );
+              }
+            })
+            .catch((error) => {
+              console.error("Error al verificar sesión:", error);
+            });
+        }
+      }
+    </script>
+  </body>
+</html>
+
+<style>
+  body {
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+  }
+
+  code {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+</style>

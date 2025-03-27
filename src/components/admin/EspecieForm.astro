@@ -1,0 +1,339 @@
+---
+import { saveEspecie } from "../../stores/especiesStore";
+
+// Verificar si estamos editando una especie existente o creando una nueva
+const { especie } = Astro.props;
+
+// Valores por defecto para el formulario
+const defaultValues = {
+  id: especie?.id || "",
+  nombre: especie?.nombre || "",
+  nombreCientifico: especie?.nombreCientifico || "",
+  familia: especie?.familia || "",
+  origen: especie?.origen || "",
+  descripcion: especie?.descripcion || "",
+  propiedades: especie?.propiedades || "",
+  usos: especie?.usos || "",
+  imagen: especie?.imagen || "",
+  imagenDetalle: especie?.imagenDetalle || "",
+};
+
+// Manejo de errores
+let error = "";
+
+// Si viene un POST, procesar el formulario
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+
+    // Construir el objeto especie desde el formulario
+    const especieData = {
+      id: formData.get("id")?.toString() || crypto.randomUUID(),
+      nombre: formData.get("nombre")?.toString() || "",
+      nombreCientifico: formData.get("nombreCientifico")?.toString() || "",
+      familia: formData.get("familia")?.toString() || "",
+      origen: formData.get("origen")?.toString() || "",
+      descripcion: formData.get("descripcion")?.toString() || "",
+      propiedades: formData.get("propiedades")?.toString() || "",
+      usos: formData.get("usos")?.toString() || "",
+      imagen: formData.get("imagen")?.toString() || "",
+      imagenDetalle: formData.get("imagenDetalle")?.toString() || "",
+    };
+
+    // Guardar la especie
+    await saveEspecie(especieData);
+
+    // Redirigir a la lista de especies
+    return Astro.redirect("/admin/especies");
+  } catch (e) {
+    console.error("Error al guardar la especie:", e);
+    error = "Error al guardar la especie. Por favor, intenta nuevamente.";
+  }
+}
+---
+
+<div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+  {
+    error && (
+      <div
+        class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6"
+        role="alert"
+      >
+        <p>{error}</p>
+      </div>
+    )
+  }
+
+  <form method="POST" id="especieForm" class="space-y-6">
+    <!-- ID oculto para edición -->
+    <input type="hidden" name="id" value={defaultValues.id} />
+
+    <!-- Nombre de la especie -->
+    <div>
+      <label
+        for="nombre"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        Nombre de la Especie *
+      </label>
+      <input
+        type="text"
+        id="nombre"
+        name="nombre"
+        value={defaultValues.nombre}
+        required
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+      />
+    </div>
+
+    <!-- Nombre Científico -->
+    <div>
+      <label
+        for="nombreCientifico"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        Nombre Científico *
+      </label>
+      <input
+        type="text"
+        id="nombreCientifico"
+        name="nombreCientifico"
+        value={defaultValues.nombreCientifico}
+        required
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white italic"
+      />
+    </div>
+
+    <!-- Familia -->
+    <div>
+      <label
+        for="familia"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        Familia
+      </label>
+      <input
+        type="text"
+        id="familia"
+        name="familia"
+        value={defaultValues.familia}
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+      />
+    </div>
+
+    <!-- Origen -->
+    <div>
+      <label
+        for="origen"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        Origen
+      </label>
+      <input
+        type="text"
+        id="origen"
+        name="origen"
+        value={defaultValues.origen}
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+      />
+    </div>
+
+    <!-- Descripción -->
+    <div>
+      <label
+        for="descripcion"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        Descripción *
+      </label>
+      <textarea
+        id="descripcion"
+        name="descripcion"
+        rows="4"
+        required
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+        >{defaultValues.descripcion}</textarea
+      >
+    </div>
+
+    <!-- Propiedades -->
+    <div>
+      <label
+        for="propiedades"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        Propiedades
+      </label>
+      <textarea
+        id="propiedades"
+        name="propiedades"
+        rows="3"
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+        >{defaultValues.propiedades}</textarea
+      >
+    </div>
+
+    <!-- Usos -->
+    <div>
+      <label
+        for="usos"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        Usos
+      </label>
+      <textarea
+        id="usos"
+        name="usos"
+        rows="3"
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+        >{defaultValues.usos}</textarea
+      >
+    </div>
+
+    <!-- Imagen -->
+    <div>
+      <label
+        for="imagen"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        URL de Imagen *
+      </label>
+      <input
+        type="url"
+        id="imagen"
+        name="imagen"
+        value={defaultValues.imagen}
+        required
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+      />
+      {
+        defaultValues.imagen && (
+          <div class="mt-2">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+              Vista previa:
+            </p>
+            <img
+              src={defaultValues.imagen}
+              alt="Vista previa"
+              class="h-24 w-36 object-cover rounded-lg"
+            />
+          </div>
+        )
+      }
+    </div>
+
+    <!-- Imagen Detalle -->
+    <div>
+      <label
+        for="imagenDetalle"
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      >
+        URL de Imagen Detalle
+      </label>
+      <input
+        type="url"
+        id="imagenDetalle"
+        name="imagenDetalle"
+        value={defaultValues.imagenDetalle}
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+      />
+      {
+        defaultValues.imagenDetalle && (
+          <div class="mt-2">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+              Vista previa:
+            </p>
+            <img
+              src={defaultValues.imagenDetalle}
+              alt="Vista previa"
+              class="h-24 w-36 object-cover rounded-lg"
+            />
+          </div>
+        )
+      }
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="flex justify-end space-x-4 pt-4">
+      <a
+        href="/admin/especies"
+        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg"
+      >
+        Cancelar
+      </a>
+      <button
+        type="submit"
+        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
+        id="submitButton"
+      >
+        {especie ? "Actualizar Especie" : "Crear Especie"}
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Preview de imágenes al cambiar las URLs
+  if (typeof window !== "undefined") {
+    const imagenInput = document.getElementById(
+      "imagen"
+    ) as HTMLInputElement | null;
+    const imagenDetalleInput = document.getElementById(
+      "imagenDetalle"
+    ) as HTMLInputElement | null;
+
+    if (imagenInput) {
+      imagenInput.addEventListener("input", (e) => {
+        const target = e.target as HTMLInputElement;
+        const url = target.value;
+        const parentElement = imagenInput.parentElement;
+
+        if (parentElement) {
+          const previewContainer = parentElement.querySelector(".mt-2");
+
+          if (url && !previewContainer) {
+            const div = document.createElement("div");
+            div.className = "mt-2";
+            div.innerHTML = `
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Vista previa:</p>
+              <img src="${url}" alt="Vista previa" class="h-24 w-36 object-cover rounded-lg" />
+            `;
+            parentElement.appendChild(div);
+          } else if (url && previewContainer) {
+            const img = previewContainer.querySelector("img");
+            if (img) img.src = url;
+          } else if (!url && previewContainer) {
+            previewContainer.remove();
+          }
+        }
+      });
+    }
+
+    if (imagenDetalleInput) {
+      imagenDetalleInput.addEventListener("input", (e) => {
+        const target = e.target as HTMLInputElement;
+        const url = target.value;
+        const parentElement = imagenDetalleInput.parentElement;
+
+        if (parentElement) {
+          const previewContainer = parentElement.querySelector(".mt-2");
+
+          if (url && !previewContainer) {
+            const div = document.createElement("div");
+            div.className = "mt-2";
+            div.innerHTML = `
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Vista previa:</p>
+              <img src="${url}" alt="Vista previa" class="h-24 w-36 object-cover rounded-lg" />
+            `;
+            parentElement.appendChild(div);
+          } else if (url && previewContainer) {
+            const img = previewContainer.querySelector("img");
+            if (img) img.src = url;
+          } else if (!url && previewContainer) {
+            previewContainer.remove();
+          }
+        }
+      });
+    }
+  }
+</script>

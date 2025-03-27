@@ -1,0 +1,315 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import {
+  getAllProyectos,
+  getProyectosByDificultad,
+} from "../../stores/proyectosStore";
+
+// Obtener los proyectos por dificultad
+const dificultades = ["Fácil", "Intermedio", "Avanzado"];
+const proyectosPorDificultad: { [key: string]: any[] } = {};
+
+// Obtener todos los proyectos
+const todosLosProyectos = await getAllProyectos();
+
+// Agrupar los proyectos por dificultad
+for (const dificultad of dificultades) {
+  proyectosPorDificultad[dificultad] = todosLosProyectos.filter(
+    (proyecto) => proyecto.dificultad === dificultad
+  );
+}
+---
+
+<Layout title="Proyectos DIY Materas | JAMUCHEE">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="text-center mb-12">
+      <h1
+        class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
+      >
+        Proyectos DIY para Materas
+      </h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+        Aprende a crear tus propias materas artesanales con cemento y yeso.
+        Proyectos paso a paso para todos los niveles de habilidad.
+      </p>
+    </div>
+
+    <!-- Filtro de dificultad -->
+    <div class="flex flex-wrap justify-center gap-3 mb-8">
+      <button
+        class="px-4 py-2 rounded-full bg-primary-100 text-primary-800 font-medium dificultad-filter active"
+        data-dificultad="todos"
+      >
+        Todos
+      </button>
+      {
+        dificultades.map((dificultad) => (
+          <button
+            class="px-4 py-2 rounded-full bg-gray-100 hover:bg-primary-100 text-gray-800 hover:text-primary-800 font-medium dificultad-filter"
+            data-dificultad={dificultad}
+          >
+            {dificultad}
+          </button>
+        ))
+      }
+    </div>
+
+    <!-- Proyectos organizados en tarjetas -->
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+      id="all-proyectos-container"
+    >
+      {
+        todosLosProyectos.map((proyecto) => (
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden proyecto-card"
+            data-dificultad={proyecto.dificultad}
+          >
+            {proyecto.imagenes && proyecto.imagenes[0] && (
+              <div class="relative">
+                <img
+                  src={proyecto.imagenes[0]}
+                  alt={proyecto.titulo}
+                  class="w-full h-56 object-cover"
+                />
+                <div class="absolute top-0 right-0 m-3">
+                  <span
+                    class={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${
+                      proyecto.dificultad === "Fácil"
+                        ? "bg-green-100 text-green-800"
+                        : proyecto.dificultad === "Intermedio"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {proyecto.dificultad}
+                  </span>
+                </div>
+              </div>
+            )}
+            <div class="p-6">
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                {proyecto.titulo}
+              </h3>
+              <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                {proyecto.descripcion}
+              </p>
+              <div class="flex justify-between items-center">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                  <span class="flex items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 mr-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    {proyecto.tiempo_estimado}
+                  </span>
+                </div>
+                <a
+                  href={`/proyectos/${proyecto.id}`}
+                  class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 font-medium inline-flex items-center"
+                >
+                  Ver proyecto
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 ml-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <!-- Contenedores de proyectos filtrados (inicialmente ocultos) -->
+    {
+      dificultades.map((dificultad) => (
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 hidden dificultad-container"
+          id={`${dificultad.toLowerCase()}-container`}
+        >
+          {proyectosPorDificultad[dificultad].map((proyecto) => (
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+              {proyecto.imagenes && proyecto.imagenes[0] && (
+                <div class="relative">
+                  <img
+                    src={proyecto.imagenes[0]}
+                    alt={proyecto.titulo}
+                    class="w-full h-56 object-cover"
+                  />
+                  <div class="absolute top-0 right-0 m-3">
+                    <span
+                      class={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${
+                        proyecto.dificultad === "Fácil"
+                          ? "bg-green-100 text-green-800"
+                          : proyecto.dificultad === "Intermedio"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {proyecto.dificultad}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div class="p-6">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                  {proyecto.titulo}
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                  {proyecto.descripcion}
+                </p>
+                <div class="flex justify-between items-center">
+                  <div class="text-sm text-gray-500 dark:text-gray-400">
+                    <span class="flex items-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4 mr-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      {proyecto.tiempo_estimado}
+                    </span>
+                  </div>
+                  <a
+                    href={`/proyectos/${proyecto.id}`}
+                    class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 font-medium inline-flex items-center"
+                  >
+                    Ver proyecto
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5 ml-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ))
+    }
+
+    <!-- Mensaje de no hay proyectos -->
+    <div id="no-proyectos-message" class="text-center py-10 hidden">
+      <p class="text-xl text-gray-600 dark:text-gray-400">
+        Lo sentimos, aún no tenemos proyectos en esta dificultad.
+      </p>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  // Filtrado de dificultad de proyectos
+  document.addEventListener("DOMContentLoaded", () => {
+    const dificultadButtons = document.querySelectorAll(".dificultad-filter");
+    const allProyectosContainer = document.getElementById(
+      "all-proyectos-container"
+    );
+    const dificultadContainers = document.querySelectorAll(
+      ".dificultad-container"
+    );
+    const noProyectosMessage = document.getElementById("no-proyectos-message");
+
+    dificultadButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        // Remover clase activa de todos los botones
+        dificultadButtons.forEach((btn) =>
+          btn.classList.remove("active", "bg-primary-100", "text-primary-800")
+        );
+        dificultadButtons.forEach((btn) =>
+          btn.classList.add("bg-gray-100", "text-gray-800")
+        );
+
+        // Añadir clase activa al botón seleccionado
+        button.classList.add("active", "bg-primary-100", "text-primary-800");
+        button.classList.remove("bg-gray-100", "text-gray-800");
+
+        const dificultad = button.getAttribute("data-dificultad");
+
+        if (dificultad === "todos") {
+          // Mostrar todos los proyectos
+          if (allProyectosContainer)
+            allProyectosContainer.classList.remove("hidden");
+          dificultadContainers.forEach((container) =>
+            container.classList.add("hidden")
+          );
+          if (noProyectosMessage) noProyectosMessage.classList.add("hidden");
+        } else {
+          // Ocultar todos los proyectos
+          if (allProyectosContainer)
+            allProyectosContainer.classList.add("hidden");
+          dificultadContainers.forEach((container) =>
+            container.classList.add("hidden")
+          );
+
+          // Mostrar solo la dificultad seleccionada
+          if (dificultad) {
+            const dificultadContainer = document.getElementById(
+              `${dificultad.toLowerCase()}-container`
+            );
+
+            if (dificultadContainer) {
+              const hasProyectos = dificultadContainer.children.length > 0;
+
+              if (hasProyectos) {
+                dificultadContainer.classList.remove("hidden");
+                if (noProyectosMessage)
+                  noProyectosMessage.classList.add("hidden");
+              } else {
+                if (noProyectosMessage)
+                  noProyectosMessage.classList.remove("hidden");
+              }
+            } else {
+              if (noProyectosMessage)
+                noProyectosMessage.classList.remove("hidden");
+            }
+          }
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .dificultad-filter.active {
+    @apply bg-primary-100 text-primary-800;
+  }
+</style>

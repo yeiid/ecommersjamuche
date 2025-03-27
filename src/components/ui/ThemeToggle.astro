@@ -1,0 +1,80 @@
+---
+// No necesitamos importaciones especiales para este componente
+---
+
+<button
+  id="theme-toggle"
+  class="fixed bottom-6 right-6 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 dark:text-white z-40"
+  aria-label="Cambiar tema"
+>
+  <div class="relative w-6 h-6 flex items-center justify-center">
+    <!-- Icono Sol (visible en modo oscuro) -->
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="absolute inset-0 dark:opacity-100 opacity-0 transition-opacity duration-300"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+
+    <!-- Icono Luna (visible en modo claro) -->
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="absolute inset-0 dark:opacity-0 opacity-100 transition-opacity duration-300"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </div>
+</button>
+
+<script>
+  // Lógica para cambiar entre temas
+  const themeToggle = document.getElementById("theme-toggle");
+
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      // Toggle dark class en documentElement
+      document.documentElement.classList.toggle("dark");
+
+      // Actualizar localStorage
+      const isDark = document.documentElement.classList.contains("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+  }
+</script>
+
+<style>
+  /* Añadir animación de rotación al botón al hacer clic */
+  #theme-toggle {
+    transform-origin: center;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  #theme-toggle:active {
+    transform: rotate(180deg);
+  }
+</style>
+

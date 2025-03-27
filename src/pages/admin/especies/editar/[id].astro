@@ -1,0 +1,106 @@
+---
+import AdminLayout from "../../../../components/admin/AdminLayout.astro";
+import EspecieForm from "../../../../components/admin/EspecieForm.astro";
+import { isAuthenticated } from "../../../../stores/authStore";
+import { getEspecieById } from "../../../../stores/especiesStore";
+
+// Definición de tipo para Especie
+type Especie = {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  imagen: string;
+  cuidados: string;
+};
+
+// Indicar que esta página debe renderizarse en el servidor
+export const prerender = false;
+
+// Verificar si estamos en modo desarrollo
+const isDev = import.meta.env.MODE === "development";
+
+// Redireccionar si no está autenticado
+let isAuth = false;
+if (typeof isAuthenticated !== "undefined") {
+  isAuthenticated.subscribe((value) => {
+    isAuth = value;
+  })();
+}
+
+// En desarrollo, consideramos autenticado
+if (isDev) {
+  isAuth = true;
+}
+
+// No redirigir en solicitudes del navegador, ya que el cliente manejará la autenticación
+if (!isAuth && Astro.request.headers.get("sec-fetch-dest") !== "document") {
+  return Astro.redirect("/admin");
+}
+
+// Obtener ID de la especie de los parámetros
+const { id } = Astro.params;
+const especie = await getEspecieById(id);
+
+// Si no existe la especie, redirigir a la lista
+if (!especie) {
+  return Astro.redirect("/admin/especies");
+}
+---
+
+<AdminLayout>
+  <div>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+        Editar Especie
+      </h1>
+      <a
+        href="/admin/especies"
+        class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 flex items-center"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 mr-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Volver a la lista
+      </a>
+    </div>
+
+    <EspecieForm especie={especie} />
+  </div>
+</AdminLayout>
+
+<script>
+  // Verificar autenticación en el cliente
+  import { isAuthenticated } from "../../../../stores/authStore";
+
+  if (typeof window !== "undefined") {
+    const isDev =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+
+    // Si está en desarrollo, activar autenticación
+    if (isDev) {
+      localStorage.setItem("devModeAuth", "true");
+      localStorage.setItem("jamuchee_admin_auth", "true");
+      isAuthenticated.set(true);
+    } else {
+      // En producción, verificar autenticación
+      let isAuth = false;
+      isAuthenticated.subscribe((value) => {
+        isAuth = value;
+        if (!isAuth && !localStorage.getItem("jamuchee_admin_auth")) {
+          window.location.href = "/admin";
+        }
+      });
+    }
+  }
+</script>

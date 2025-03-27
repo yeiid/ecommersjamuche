@@ -1,0 +1,176 @@
+---
+import { isAuthenticated } from "../../stores/authStore";
+import AdminSidebar from "./AdminSidebar.astro";
+import "../../styles/globals.css";
+
+// Forzar autenticación en modo desarrollo
+const isDev =
+  import.meta.env.MODE === "development" ||
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
+---
+
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Panel de Administración JAMUCHEE" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <title>Admin JAMUCHEE</title>
+    <script is:inline src="/admin-access.js"></script>
+  </head>
+  <body
+    class="h-full bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100"
+  >
+    <div class="flex h-full">
+      <AdminSidebar />
+
+      <div class="flex-1 flex flex-col h-full overflow-auto">
+        <header
+          class="bg-white dark:bg-gray-800 shadow-md p-4 flex items-center justify-between"
+        >
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">
+            Panel de Administración
+          </h1>
+
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white"
+              >
+                A
+              </div>
+              <span
+                class="font-medium text-gray-700 dark:text-gray-300 hidden md:inline-block"
+                >Administrador</span
+              >
+            </div>
+
+            <button
+              id="logout-btn"
+              class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm font-medium transition-colors"
+            >
+              Salir
+            </button>
+          </div>
+        </header>
+
+        <main class="flex-1 p-6 overflow-auto">
+          <!-- Contenido principal -->
+          <slot />
+        </main>
+
+        <footer
+          class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-4 px-6 text-center text-sm text-gray-600 dark:text-gray-400"
+        >
+          © {new Date().getFullYear()} JAMUCHEE - Panel de Administración
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  import { logout, isAuthenticated } from "../../stores/authStore";
+
+  // Variables de autenticación
+  const isDev =
+    import.meta.env.MODE === "development" ||
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+  const PERSISTENCE_KEY = "jamuchee_admin_auth";
+  const SESSION_KEY = "session_checked";
+  let authCheckInProgress = false;
+
+  // Función para verificar autenticación de manera eficiente
+  async function checkAuthentication() {
+    // Evitar verificación múltiple
+    if (authCheckInProgress) return;
+    authCheckInProgress = true;
+
+    try {
+      // En desarrollo, siempre permitir acceso
+      if (isDev) {
+        console.log("Modo desarrollo: Activando autenticación automática");
+        // Actualizar estado y almacenamiento
+        isAuthenticated.set(true);
+        localStorage.setItem("devModeAuth", "true");
+        localStorage.setItem(PERSISTENCE_KEY, "true");
+        sessionStorage.setItem(SESSION_KEY, "true");
+        return;
+      }
+
+      // Si ya verificamos la sesión anteriormente, usar el estado guardado
+      if (sessionStorage.getItem(SESSION_KEY) === "true") {
+        const hasLocalAuth = localStorage.getItem(PERSISTENCE_KEY) === "true";
+        console.log(
+          "Sesión ya verificada:",
+          hasLocalAuth ? "Autenticado" : "No autenticado"
+        );
+        isAuthenticated.set(hasLocalAuth);
+
+        // Si no está autenticado y no estamos en la página de login
+        if (!hasLocalAuth && !window.location.pathname.endsWith("/admin")) {
+          console.log("No autenticado, redirigiendo a login");
+          window.location.href = "/admin";
+        }
+        return;
+      }
+
+      // Marcar que hemos verificado la sesión
+      sessionStorage.setItem(SESSION_KEY, "true");
+
+      // Verificar localStorage primero (más rápido)
+      const hasLocalAuth = localStorage.getItem(PERSISTENCE_KEY) === "true";
+      if (hasLocalAuth) {
+        console.log("Token local encontrado, considerando autenticado");
+        isAuthenticated.set(true);
+        return;
+      }
+
+      // Si no estamos en la página de login, redirigir
+      if (!window.location.pathname.endsWith("/admin")) {
+        console.log("No autenticado y no en página de login, redirigiendo");
+        window.location.href = "/admin";
+      }
+    } finally {
+      authCheckInProgress = false;
+    }
+  }
+
+  // Verificar autenticación cuando el DOM esté listo
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", checkAuthentication);
+  } else {
+    checkAuthentication();
+  }
+
+  // Manejar cierre de sesión
+  document.getElementById("logout-btn")?.addEventListener("click", () => {
+    console.log("Cerrando sesión...");
+
+    // Limpiar localStorage
+    localStorage.removeItem("devModeAuth");
+    localStorage.removeItem(PERSISTENCE_KEY);
+    localStorage.removeItem("authStatus");
+    sessionStorage.removeItem(SESSION_KEY);
+
+    // Actualizar estado de autenticación
+    isAuthenticated.set(false);
+
+    // Redireccionar a login
+    window.location.href = "/admin";
+  });
+</script>
+
+<style>
+  body {
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+  }
+</style>

@@ -1,0 +1,176 @@
+---
+// Importar componentes necesarios
+import CartButton from "../ui/CartButton.astro";
+import WishlistButton from "../ui/WishlistButton.astro";
+
+// Enlaces de navegación
+const links = [
+  { name: "INICIO", href: "/", icon: "" },
+  { name: "PRODUCTOS", href: "/productos", icon: "v" },
+  { name: "RECOMENDACIONES", href: "/recomendaciones", icon: "v" },
+  { name: "NOSOTROS", href: "/nosotros", icon: "v" },
+  { name: "ESPECIES", href: "/especies", icon: "v" },
+  { name: "CONTACTO", href: "/contacto", icon: "v" },
+];
+
+// Obtener la ruta actual para resaltar el enlace activo
+const { pathname } = Astro.url;
+---
+
+<header
+  class="bg-white dark:bg-gray-900 shadow-md transition-colors duration-300"
+>
+  <div class="container mx-auto px-4">
+    <div class="flex items-center justify-between py-4">
+      <a href="/" class="flex items-center">
+        <img
+          src="/favicon.ico"
+          alt="Logo JAMUCHEE"
+          width="40"
+          height="40"
+          class="mr-2"
+        />
+        <span class="font-bold text-xl text-primary-600 dark:text-primary-400"
+          >JAMUCHEE</span
+        >
+      </a>
+
+      <!-- Navegación Desktop -->
+      <nav class="hidden md:flex space-x-6">
+        {
+          links.map((link) => (
+            <a
+              href={link.href}
+              class={`font-medium transition duration-300 ${
+                pathname === link.href
+                  ? "text-primary-600 dark:text-primary-400"
+                  : "text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+              }`}
+            >
+              {link.name}
+            </a>
+          ))
+        }
+      </nav>
+
+      <div class="flex items-center space-x-4">
+        <!-- Botón de wishlist que muestra el número de elementos en la lista de deseos -->
+        <div class="relative">
+          <WishlistButton />
+        </div>
+
+        <!-- CarButton que muestra el número de elementos en el carrito -->
+        <div class="relative">
+          <CartButton />
+        </div>
+
+        <!-- Botón de menú móvil -->
+        <button
+          id="menu-toggle"
+          class="p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition duration-300 md:hidden"
+          aria-label="Abrir menú"
+        >
+          <span id="menu-icon-open" class="block">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </span>
+          <span id="menu-icon-close" class="hidden">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navegación Móvil -->
+    <nav id="mobile-menu" class="md:hidden py-4 hidden">
+      <div class="flex flex-col space-y-4">
+        {
+          links.map((link) => (
+            <a
+              href={link.href}
+              class={`font-medium transition duration-300 ${
+                pathname === link.href
+                  ? "text-primary-600 dark:text-primary-400"
+                  : "text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+              }`}
+            >
+              {link.name}
+            </a>
+          ))
+        }
+        <a
+          href="/lista-deseos"
+          class={`font-medium transition duration-300 ${
+            pathname === "/lista-deseos"
+              ? "text-primary-600 dark:text-primary-400"
+              : "text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+          }`}
+        >
+          LISTA DE DESEOS
+        </a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  // Lógica para manejar el menú móvil
+  document.addEventListener("DOMContentLoaded", () => {
+    const menuButton = document.getElementById("menu-toggle");
+    const mobileMenu = document.getElementById("mobile-menu");
+    const menuIconOpen = document.getElementById("menu-icon-open");
+    const menuIconClose = document.getElementById("menu-icon-close");
+
+    if (menuButton && mobileMenu && menuIconOpen && menuIconClose) {
+      menuButton.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+        menuIconOpen.classList.toggle("hidden");
+        menuIconClose.classList.toggle("hidden");
+      });
+    }
+  });
+</script>
+
+<style>
+  /* Animaciones para el menú */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  #mobile-menu:not(.hidden) {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+</style>

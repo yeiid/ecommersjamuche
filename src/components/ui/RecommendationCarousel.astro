@@ -1,0 +1,184 @@
+---
+// Componente para mostrar productos recomendados
+---
+
+<div class="recommendations-container mt-8">
+  <h3 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+    Recomendado para ti
+  </h3>
+
+  <div
+    id="recommendations-list"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+  >
+    <!-- Aquí se cargarán dinámicamente las recomendaciones -->
+    <div class="loader flex justify-center py-8">
+      <div class="animate-pulse flex space-x-4">
+        <div class="rounded-full bg-gray-300 dark:bg-gray-700 h-12 w-12"></div>
+        <div class="flex-1 space-y-4 py-1">
+          <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+          <div class="space-y-2">
+            <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-5/6"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { recommendations } from "../../stores/recommendationsStore";
+  import { addToCart } from "../../stores/cartStore";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const recommendationsList = document.getElementById("recommendations-list");
+    if (!recommendationsList) return;
+
+    // Formatear precio en pesos colombianos
+    const formatPrice = (price) => {
+      return new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0,
+      }).format(price);
+    };
+
+    // Renderizar recomendaciones
+    const renderRecommendations = (items) => {
+      if (!recommendationsList) return;
+
+      if (items.length === 0) {
+        recommendationsList.innerHTML = `
+          <div class="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+            <p>No hay recomendaciones disponibles aún.</p>
+            <p class="mt-2">Sigue explorando productos para personalizar tus recomendaciones.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Eliminar loader si existe
+      const loader = recommendationsList.querySelector(".loader");
+      if (loader) loader.remove();
+
+      let itemsHTML = "";
+
+      items.forEach((item) => {
+        const formattedPrice = formatPrice(item.price);
+        const formattedDiscountPrice = item.discountPrice
+          ? formatPrice(item.discountPrice)
+          : null;
+        const hasDiscount = !!formattedDiscountPrice;
+
+        itemsHTML += `
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col">
+            <a href="/producto/${item.id}" class="relative group">
+              <img 
+                src="${item.image}" 
+                alt="${item.name}" 
+                class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              ${
+                hasDiscount
+                  ? `
+                <span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
+                  OFERTA
+                </span>
+              `
+                  : ""
+              }
+            </a>
+            
+            <div class="p-4 flex-grow flex flex-col">
+              <a href="/producto/${item.id}" class="block hover:text-primary-600 transition-colors">
+                <h4 class="font-semibold text-gray-800 dark:text-white">${item.name}</h4>
+              </a>
+              
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 mb-3 line-clamp-2">
+                ${item.description || ""}
+              </p>
+              
+              <div class="mt-auto">
+                <div class="flex items-center justify-between mb-3">
+                  ${
+                    hasDiscount
+                      ? `
+                    <span class="text-gray-500 dark:text-gray-400 text-sm line-through">${formattedPrice}</span>
+                    <span class="text-lg font-bold text-gray-800 dark:text-white">${formattedDiscountPrice}</span>
+                  `
+                      : `
+                    <span class="text-lg font-bold text-gray-800 dark:text-white">${formattedPrice}</span>
+                  `
+                  }
+                </div>
+                
+                <button 
+                  class="add-to-cart-btn w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  data-id="${item.id}"
+                  data-name="${item.name}"
+                  data-price="${item.discountPrice || item.price}"
+                  data-image="${item.image}"
+                  data-description="${item.description || ""}"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Añadir
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Añadir los elementos al DOM
+      recommendationsList.innerHTML = itemsHTML;
+
+      // Añadir event listeners a los botones de añadir al carrito
+      document.querySelectorAll(".add-to-cart-btn").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          const btn = e.currentTarget;
+
+          // Obtener datos del producto desde los atributos data
+          const id = btn.getAttribute("data-id");
+          const name = btn.getAttribute("data-name");
+          const price = parseInt(btn.getAttribute("data-price"), 10);
+          const image = btn.getAttribute("data-image");
+          const description = btn.getAttribute("data-description");
+
+          if (!id || !name || !image || isNaN(price)) return;
+
+          // Añadir el producto al carrito
+          addToCart({
+            id,
+            name,
+            price,
+            image,
+            description,
+          });
+
+          // Efecto visual para confirmar que se añadió al carrito
+          const originalText = btn.innerHTML;
+          btn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            Añadido
+          `;
+
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+          }, 1500);
+        });
+      });
+    };
+
+    // Suscribirse a cambios en las recomendaciones
+    const currentRecs = recommendations.get();
+    renderRecommendations(currentRecs);
+
+    recommendations.subscribe(renderRecommendations);
+  });
+</script>
+

@@ -1,0 +1,439 @@
+---
+// No se necesitan props para este componente
+
+import {
+  supabase,
+  testSupabaseConnection,
+  connectionState,
+} from "../../lib/supabase";
+import { isAuthenticated } from "../../stores/authStore";
+import { login, authError } from "../../stores/authStore";
+
+let errorMessage = "";
+let loadingState = false;
+
+// Comprobar si hay un error de conexión a Supabase
+let connectionError = null;
+let retryCount = 0;
+
+// Funciones auxiliares para manejar la lógica del componente
+async function checkConnection() {
+  try {
+    const connectionStatus = await testSupabaseConnection();
+    if (!connectionStatus.success) {
+      connectionError = connectionStatus.error;
+      retryCount = connectionState.retryCount;
+    }
+    return connectionStatus;
+  } catch (err) {
+    console.error("Error al verificar conexión inicial:", err);
+    return { success: false, error: err };
+  }
+}
+
+// Verificar la conexión a Supabase al cargar la página
+if (Astro.request.method === "GET") {
+  await checkConnection();
+}
+
+// Verificar si hay un envío del formulario
+if (Astro.request.method === "POST") {
+  loadingState = true;
+  try {
+    const formData = await Astro.request.formData();
+    const email = formData.get("email")?.toString() || "";
+    const password = formData.get("password")?.toString() || "";
+
+    // Verificar primero si hay conexión a Supabase
+    const connectionStatus = await testSupabaseConnection();
+    if (!connectionStatus.success) {
+      throw new Error(
+        `Error de conexión: No se puede conectar con Supabase. ${(connectionStatus.error as Error)?.message || ""}`
+      );
+    }
+
+    // Si hay conexión, intentar el inicio de sesión
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    // Si llegamos aquí, la autenticación fue exitosa
+    isAuthenticated.set(true);
+    return Astro.redirect("/admin/dashboard");
+  } catch (error) {
+    console.error("Error en inicio de sesión:", error);
+    if (typeof error === "object" && error !== null) {
+      if (
+        "message" in error &&
+        typeof (error as { message: unknown }).message === "string" &&
+        (error as { message: string }).message.includes("fetch failed")
+      ) {
+        errorMessage =
+          "Error de conexión: No se pudo conectar con el servidor de Supabase. Por favor, verifica tu conexión a internet o inténtalo de nuevo más tarde.";
+      } else if (
+        "message" in error &&
+        typeof (error as { message: unknown }).message === "string"
+      ) {
+        const errorMsg = (error as { message: string }).message;
+        if (errorMsg.includes("Invalid login credentials")) {
+          errorMessage =
+            "Credenciales inválidas: El correo electrónico o la contraseña son incorrectos.";
+        } else if (errorMsg.includes("Error de conexión")) {
+          errorMessage = errorMsg;
+        } else {
+          errorMessage = `Error: ${errorMsg}`;
+        }
+      } else {
+        errorMessage = "Error desconocido al iniciar sesión.";
+      }
+    } else {
+      errorMessage = "Error desconocido al iniciar sesión.";
+    }
+  } finally {
+    loadingState = false;
+  }
+}
+---
+
+<div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+  <!-- Incluir script de acceso administrador -->
+  <script is:inline src="/admin-access.js"></script>
+
+  <!-- Contenedor centrado para el formulario (funciona en todas las pantallas) -->
+  <div class="w-full max-w-md mx-auto my-auto p-6">
+    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+      <div class="p-6 sm:p-8">
+        <div class="text-center mb-6">
+          <img src="/logo.svg" alt="JAMUCHEE" class="h-12 mx-auto mb-4" />
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+            Iniciar Sesión
+          </h2>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">
+            Panel de Administración JAMUCHEE
+          </p>
+        </div>
+
+        {
+          connectionError && (
+            <div
+              class="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 mb-4"
+              role="alert"
+            >
+              <p class="font-bold">Advertencia de conexión</p>
+              <p>
+                Detectamos problemas para conectar con el servidor de Supabase.
+                {connectionState.retryCount > 0 && (
+                  <span>
+                    Intentos de reconexión: {connectionState.retryCount} de 3
+                  </span>
+                )}
+              </p>
+              <button
+                id="retry-connection"
+                class="mt-2 bg-amber-500 hover:bg-amber-600 text-white py-1 px-3 rounded text-sm"
+              >
+                Probar conexión
+              </button>
+            </div>
+          )
+        }
+
+        {
+          errorMessage && (
+            <div
+              class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4"
+              role="alert"
+            >
+              <p id="error-message-text">{errorMessage}</p>
+            </div>
+          )
+        }
+
+        <form id="login-form" class="space-y-6">
+          <div>
+            <label
+              for="email"
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Correo electrónico
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+              required
+              value="admin@jamuchee.com"
+            />
+          </div>
+
+          <div>
+            <label
+              for="password"
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Contraseña
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-white"
+              required
+              value="admin123"
+            />
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              id="login-button"
+              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              disabled={loadingState}
+            >
+              <span id="login-text">Iniciar sesión</span>
+              <span id="login-spinner" class={loadingState ? "" : "hidden"}>
+                <svg
+                  class="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Procesando...
+              </span>
+            </button>
+          </div>
+
+          <div class="flex items-center mt-2">
+            <div class="flex items-center flex-1">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                checked
+                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:border-gray-600 dark:bg-gray-800"
+              />
+              <label
+                for="remember-me"
+                class="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+              >
+                Recordarme
+              </label>
+            </div>
+
+            <a
+              href="#"
+              class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+            >
+              Ayuda
+            </a>
+          </div>
+        </form>
+
+        <div
+          class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-center"
+        >
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            © {new Date().getFullYear()} JAMUCHEE - Todos los derechos reservados
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { login, authError, isAuthenticated } from "../../stores/authStore";
+  import {
+    supabase,
+    testSupabaseConnection,
+    connectionState,
+  } from "../../lib/supabase";
+
+  // Contador para evitar múltiples intentos de autenticación
+  let authAttempts = 0;
+  const MAX_AUTH_ATTEMPTS = 3;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("login-form");
+    const errorMessageText = document.getElementById("error-message-text");
+    const loginButton = document.getElementById("login-button");
+    const loginText = document.getElementById("login-text");
+    const loginSpinner = document.getElementById("login-spinner");
+
+    // Determinar si estamos en desarrollo
+    const isDev = import.meta.env.MODE === "development";
+
+    // En desarrollo, autenticar automáticamente con credenciales predefinidas
+    if (isDev && authAttempts === 0) {
+      authAttempts++;
+      authenticateDevUser();
+    }
+
+    // Función para autenticar automáticamente en desarrollo
+    function authenticateDevUser() {
+      localStorage.setItem("devModeAuth", "true");
+      localStorage.setItem("jamuchee_admin_auth", "true");
+      localStorage.setItem("authStatus", "authenticated");
+      isAuthenticated.set(true);
+
+      // Verificar si ya estamos en el dashboard
+      if (!window.location.pathname.includes("/dashboard")) {
+        window.location.href = "/admin/dashboard";
+      }
+    }
+
+    if (form && loginButton && loginText && loginSpinner) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Evitar múltiples intentos de autenticación
+        authAttempts++;
+
+        if (authAttempts > MAX_AUTH_ATTEMPTS) {
+          showError(
+            "Demasiados intentos de inicio de sesión. Por favor, recarga la página."
+          );
+          return;
+        }
+
+        // Obtener valores del formulario
+        const emailElement = document.getElementById(
+          "email"
+        ) as HTMLInputElement;
+        const passwordElement = document.getElementById(
+          "password"
+        ) as HTMLInputElement;
+
+        if (!emailElement || !passwordElement) {
+          showError("Por favor, complete todos los campos");
+          return;
+        }
+
+        const email = emailElement.value || "";
+        const password = passwordElement.value || "";
+
+        // Mostrar spinner
+        loginText.classList.add("hidden");
+        loginSpinner.classList.remove("hidden");
+        (loginButton as HTMLButtonElement).disabled = true;
+
+        try {
+          // En modo desarrollo, autenticar con credenciales fijas
+          if (
+            isDev &&
+            email === "admin@jamuchee.com" &&
+            password === "admin123"
+          ) {
+            authenticateDevUser();
+            return;
+          }
+
+          // Verificar conexión antes de intentar iniciar sesión
+          const connectionCheck = await testSupabaseConnection();
+          if (!connectionCheck.success) {
+            showError(
+              "No se pudo conectar a la base de datos. Verifica tu conexión a internet."
+            );
+            return;
+          }
+
+          // Autenticar con Supabase
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (error) {
+            throw error;
+          }
+
+          if (data.user) {
+            // Actualizar el estado de autenticación
+            isAuthenticated.set(true);
+
+            // Guardar en localStorage
+            localStorage.setItem("jamuchee_admin_auth", "true");
+            localStorage.setItem("authStatus", "authenticated");
+
+            // Redireccionar al dashboard
+            window.location.href = "/admin/dashboard";
+          } else {
+            showError(
+              "No se pudo iniciar sesión. Datos de usuario no disponibles."
+            );
+          }
+        } catch (error: unknown) {
+          let errorMessage = "Error desconocido";
+
+          if (error instanceof Error) {
+            errorMessage = error.message;
+          } else if (
+            typeof error === "object" &&
+            error !== null &&
+            "message" in error
+          ) {
+            const msg = (error as any).message;
+            if (msg.includes("Invalid login credentials")) {
+              errorMessage = "Credenciales incorrectas";
+            } else if (msg.includes("Failed to fetch")) {
+              errorMessage = "Error de conexión. Verifica tu internet.";
+            } else {
+              errorMessage = msg;
+            }
+          }
+
+          showError("Error: " + errorMessage);
+        } finally {
+          // Ocultar spinner
+          loginText.classList.remove("hidden");
+          loginSpinner.classList.add("hidden");
+          (loginButton as HTMLButtonElement).disabled = false;
+        }
+      });
+    }
+
+    function showError(message: string): void {
+      const errorMessageText = document.getElementById("error-message-text");
+      if (errorMessageText) {
+        errorMessageText.textContent = message;
+        const errorDiv = errorMessageText.closest(".bg-red-100");
+        if (errorDiv) {
+          errorDiv.classList.remove("hidden");
+        } else {
+          // Si no existe el div de error, crearlo
+          const newErrorDiv = document.createElement("div");
+          newErrorDiv.className =
+            "bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4";
+          newErrorDiv.setAttribute("role", "alert");
+
+          newErrorDiv.appendChild(errorMessageText);
+
+          // Insertar antes del formulario
+          const formElement = document.getElementById("login-form");
+          if (formElement && formElement.parentNode) {
+            formElement.parentNode.insertBefore(newErrorDiv, formElement);
+          }
+        }
+      }
+    }
+  });
+</script>

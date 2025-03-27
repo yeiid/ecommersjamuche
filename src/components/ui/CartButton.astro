@@ -1,0 +1,215 @@
+---
+// No necesitamos importaciones aquí
+---
+
+<button
+  id="cart-button"
+  class="relative p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition duration-300"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <circle cx="8" cy="21" r="1"></circle>
+    <circle cx="19" cy="21" r="1"></circle>
+    <path
+      d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"
+    ></path>
+  </svg>
+  <span
+    id="cart-count"
+    class="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+    >0</span
+  >
+</button>
+
+<div
+  id="mini-cart"
+  class="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden transition-all duration-300 opacity-0 pointer-events-none transform translate-y-2 z-50"
+>
+  <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+    <h3 class="font-bold text-gray-900 dark:text-white">Tu Carrito</h3>
+  </div>
+
+  <div id="mini-cart-items" class="p-4 max-h-64 overflow-y-auto">
+    <div
+      class="flex justify-center items-center h-32 text-gray-500 dark:text-gray-400"
+    >
+      Tu carrito está vacío
+    </div>
+  </div>
+
+  <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+    <div class="flex justify-between mb-2">
+      <span class="font-medium text-gray-700 dark:text-gray-300">Total:</span>
+      <span id="mini-cart-total" class="font-bold text-gray-900 dark:text-white"
+        >$0</span
+      >
+    </div>
+    <a
+      href="/carrito"
+      class="block w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded text-center transition-colors"
+    >
+      Ver Carrito
+    </a>
+  </div>
+</div>
+
+<script>
+  import { cartCount, cartTotal, cartItems } from "../../stores/cartStore";
+
+  // Definir interfaz para los items del carrito
+  interface CartItem {
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+    quantity: number;
+    description?: string;
+  }
+
+  // Actualizar la UI cuando cambie el contador del carrito
+  cartCount.subscribe((count) => {
+    const countElement = document.getElementById("cart-count");
+    if (countElement) {
+      countElement.textContent = count.toString();
+
+      // Ocultar si es cero
+      if (count === 0) {
+        countElement.classList.add("hidden");
+      } else {
+        countElement.classList.remove("hidden");
+      }
+    }
+  });
+
+  // Actualizar el total
+  cartTotal.subscribe((total) => {
+    const formatter = new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0,
+    });
+
+    const totalElement = document.getElementById("mini-cart-total");
+    if (totalElement) {
+      totalElement.textContent = formatter.format(total);
+    }
+  });
+
+  // Actualizar los items del mini carrito
+  cartItems.subscribe((items: Record<string, CartItem>) => {
+    const miniCartItems = document.getElementById("mini-cart-items");
+    if (!miniCartItems) return;
+
+    // Si no hay items, mostrar mensaje
+    if (Object.keys(items).length === 0) {
+      miniCartItems.innerHTML = `
+        <div class="flex justify-center items-center h-32 text-gray-500 dark:text-gray-400">
+          Tu carrito está vacío
+        </div>
+      `;
+      return;
+    }
+
+    // Si hay items, mostrar lista
+    let itemsHtml = "";
+
+    for (const id in items) {
+      const item = items[id];
+      itemsHtml += `
+        <div class="flex items-center py-2 border-b border-gray-100 dark:border-gray-800 last:border-0">
+          <div class="w-12 h-12 rounded overflow-hidden mr-3">
+            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+          </div>
+          <div class="flex-1">
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white">${item.name}</h4>
+            <div class="flex justify-between items-center mt-1">
+              <span class="text-xs text-gray-500 dark:text-gray-400">${item.quantity} x $${item.price.toLocaleString()}</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">$${(item.price * item.quantity).toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    miniCartItems.innerHTML = itemsHtml;
+  });
+
+  // Mostrar/ocultar mini carrito al hacer hover
+  document.addEventListener("DOMContentLoaded", () => {
+    const cartButton = document.getElementById("cart-button");
+    const miniCart = document.getElementById("mini-cart");
+
+    if (cartButton && miniCart) {
+      // Mostrar al hacer hover
+      cartButton.addEventListener("mouseenter", () => {
+        miniCart.classList.remove(
+          "opacity-0",
+          "pointer-events-none",
+          "translate-y-2"
+        );
+        miniCart.classList.add("opacity-100", "translate-y-0");
+      });
+
+      // También mostrar al hacer hover en el mini carrito
+      miniCart.addEventListener("mouseenter", () => {
+        miniCart.classList.remove(
+          "opacity-0",
+          "pointer-events-none",
+          "translate-y-2"
+        );
+        miniCart.classList.add("opacity-100", "translate-y-0");
+      });
+
+      // Ocultar al salir
+      miniCart.addEventListener("mouseleave", () => {
+        miniCart.classList.add(
+          "opacity-0",
+          "pointer-events-none",
+          "translate-y-2"
+        );
+        miniCart.classList.remove("opacity-100", "translate-y-0");
+      });
+
+      // Ocultar al salir del botón (si no está sobre el mini carrito)
+      cartButton.addEventListener("mouseleave", (e) => {
+        // Comprobar si el cursor está sobre el mini carrito
+        const rect = miniCart.getBoundingClientRect();
+        const isOverMiniCart =
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom;
+
+        if (!isOverMiniCart) {
+          setTimeout(() => {
+            // Verificar de nuevo después de un pequeño delay
+            const newRect = miniCart.getBoundingClientRect();
+            const isNowOverMiniCart =
+              e.clientX >= newRect.left &&
+              e.clientX <= newRect.right &&
+              e.clientY >= newRect.top &&
+              e.clientY <= newRect.bottom;
+
+            if (!isNowOverMiniCart) {
+              miniCart.classList.add(
+                "opacity-0",
+                "pointer-events-none",
+                "translate-y-2"
+              );
+              miniCart.classList.remove("opacity-100", "translate-y-0");
+            }
+          }, 100);
+        }
+      });
+    }
+  });
+</script>

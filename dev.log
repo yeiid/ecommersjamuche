@@ -1,0 +1,16 @@
+
+> ecommersjamuche@0.0.1 dev /home/yeiid/cursos/pata-git/Proyectos_full/jamuche-astro/ecommersjamuche
+> astro dev
+
+22:20:01 [types] Generated 1ms
+22:20:01 [content] Syncing content
+22:20:01 [content] Synced content
+22:20:01 [vite] Forced re-optimization of dependencies
+
+ astro  v5.5.4 ready in 1389 ms
+
+┃ Local    http://localhost:4321/
+┃ Network  use --host to expose
+
+22:20:01 watching for file changes...
+ ELIFECYCLE  Command failed.
