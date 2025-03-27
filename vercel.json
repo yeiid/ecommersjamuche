@@ -4,13 +4,6 @@
   "devCommand": "pnpm dev",
   "installCommand": "pnpm install",
   "outputDirectory": "dist",
-  "functions": {
-    "api/**/*.[jt]s": {
-      "memory": 1024,
-      "maxDuration": 10,
-      "runtime": "nodejs20.x"
-    }
-  },
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "cleanUrls": true,
   "env": {

@@ -1,32 +1,25 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
-import vercel from "@astrojs/vercel";
+import vercel from "@astrojs/vercel/serverless";
 import svelte from "@astrojs/svelte";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://jamuchee.com",
   integrations: [tailwind(), svelte()],
-  // Cambiar de "static" a "server" para mejor compatibilidad con Vercel
+  // Mantener modo servidor para SSR
   output: "server",
   adapter: vercel({
     webAnalytics: {
       enabled: true,
     },
-    // Habilitar opciones adicionales de Vercel
-    imageService: true,
-    // Habilitar funciones Edge para mejor rendimiento
-    edgeMiddleware: true,
     // Optimizar para velocidad de respuesta
     speedInsights: {
       enabled: true,
     },
-    // Especificar un runtime compatible con Vercel
-    functionPerRoute: true,
-    includeFiles: ["./dist/client/**/*"],
-    // Seleccionar runtime más reciente de Node.js
-    target: "node20.x",
+    // Configurar explícitamente Node.js 20
+    nodeVersion: "20.x",
   }),
   // Configuración de servidor para arreglar problemas de WebSocket
   server: {
