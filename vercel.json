@@ -8,5 +8,12 @@
   "env": {
     "PUBLIC_SUPABASE_URL": "SUPABASE_URL_PLACEHOLDER",
     "PUBLIC_SUPABASE_ANON_KEY": "SUPABASE_ANON_KEY_PLACEHOLDER"
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "functions": {
+    "api/*.js": {
+      "runtime": "nodejs20.x",
+      "memory": 1024
+    }
   }
 }

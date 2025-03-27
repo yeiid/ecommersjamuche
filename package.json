@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build --verbose",
+    "postbuild": "echo '{ \"runtime\": \"nodejs20.x\" }' > .vercel/output/functions/_render.func/.vc-config.json",
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
