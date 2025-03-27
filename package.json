@@ -3,12 +3,13 @@
   "type": "module",
   "version": "0.1.0",
   "engines": {
-    "node": ">=20.0.0"
+    "node": "20.x",
+    "npm": ">=9.0.0"
   },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build --verbose",
+    "build": "astro build --verbose && node scripts/fix-vercel-runtime.js",
     "postbuild": "echo '{ \"runtime\": \"nodejs20.x\" }' > .vercel/output/functions/_render.func/.vc-config.json",
     "preview": "astro preview",
     "astro": "astro",
@@ -17,8 +18,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --reporter=junit --outputFile=./test-results.xml",
-    "lint": "eslint src --ext .js,.astro,.ts,.jsx,.tsx",
-    "format": "prettier --write .",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.astro",
+    "format": "prettier --write . --plugin=prettier-plugin-astro",
     "analyze": "astro build --analyzer",
     "check": "astro check"
   },
