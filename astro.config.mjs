@@ -13,12 +13,21 @@ export default defineConfig({
   // Mantener modo servidor para SSR
   output: "server",
   adapter: vercel({
-    // Configuración mínima para evitar conflictos
     analytics: true,
-    includeFiles: ["./dist/client/**/*"],
-
-    // Forzar Node.js 20.x
-    runtime: "nodejs20.x",
+    imagesConfig: {
+      sizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+      domains: [],
+      remotePatterns: [],
+    },
+    webAnalytics: {
+      enabled: true,
+    },
+    speedInsights: {
+      enabled: true,
+    },
+    devImageService: "vercel",
+    includedFiles: ["./scripts/fix-vercel-runtime.js"],
+    functionPerRoute: false,
   }),
   // Configuración de servidor para arreglar problemas de WebSocket
   server: {
