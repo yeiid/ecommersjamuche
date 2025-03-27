@@ -22,6 +22,11 @@ export default defineConfig({
     speedInsights: {
       enabled: true,
     },
+    // Especificar un runtime compatible con Vercel
+    functionPerRoute: true,
+    includeFiles: ["./dist/client/**/*"],
+    // Seleccionar runtime más reciente de Node.js
+    target: "node20.x",
   }),
   // Configuración de servidor para arreglar problemas de WebSocket
   server: {
