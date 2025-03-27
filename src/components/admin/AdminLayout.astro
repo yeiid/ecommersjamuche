@@ -3,11 +3,8 @@ import { isAuthenticated } from "../../stores/authStore";
 import AdminSidebar from "./AdminSidebar.astro";
 import "../../styles/globals.css";
 
-// Forzar autenticación en modo desarrollo
-const isDev =
-  import.meta.env.MODE === "development" ||
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1";
+// Determinar si estamos en desarrollo (más limpio y moderno)
+const isDev = import.meta.env.DEV;
 ---
 
 <html lang="es" class="h-full">
@@ -73,92 +70,68 @@ const isDev =
 <script>
   import { logout, isAuthenticated } from "../../stores/authStore";
 
-  // Variables de autenticación
-  const isDev =
-    import.meta.env.MODE === "development" ||
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1";
-  const PERSISTENCE_KEY = "jamuchee_admin_auth";
+  // Constantes para la autenticación
+  const AUTH_KEY = "jamuchee_admin_auth";
   const SESSION_KEY = "session_checked";
-  let authCheckInProgress = false;
+  const isDev = import.meta.env.DEV;
 
-  // Función para verificar autenticación de manera eficiente
+  // Función moderna con async/await para verificar autenticación
   async function checkAuthentication() {
-    // Evitar verificación múltiple
-    if (authCheckInProgress) return;
-    authCheckInProgress = true;
-
     try {
-      // En desarrollo, siempre permitir acceso
+      // En desarrollo, simplificar la autenticación
       if (isDev) {
-        console.log("Modo desarrollo: Activando autenticación automática");
-        // Actualizar estado y almacenamiento
+        console.log("Modo desarrollo: Autenticación automática activada");
         isAuthenticated.set(true);
-        localStorage.setItem("devModeAuth", "true");
-        localStorage.setItem(PERSISTENCE_KEY, "true");
+        localStorage.setItem(AUTH_KEY, "true");
         sessionStorage.setItem(SESSION_KEY, "true");
         return;
       }
 
-      // Si ya verificamos la sesión anteriormente, usar el estado guardado
+      // Si ya verificamos la sesión, usar estado guardado
       if (sessionStorage.getItem(SESSION_KEY) === "true") {
-        const hasLocalAuth = localStorage.getItem(PERSISTENCE_KEY) === "true";
-        console.log(
-          "Sesión ya verificada:",
-          hasLocalAuth ? "Autenticado" : "No autenticado"
-        );
-        isAuthenticated.set(hasLocalAuth);
+        const hasAuth = localStorage.getItem(AUTH_KEY) === "true";
+        isAuthenticated.set(hasAuth);
 
-        // Si no está autenticado y no estamos en la página de login
-        if (!hasLocalAuth && !window.location.pathname.endsWith("/admin")) {
-          console.log("No autenticado, redirigiendo a login");
+        // Redireccionar si no está autenticado
+        if (!hasAuth && !window.location.pathname.endsWith("/admin")) {
           window.location.href = "/admin";
         }
         return;
       }
 
-      // Marcar que hemos verificado la sesión
+      // Marcar sesión como verificada
       sessionStorage.setItem(SESSION_KEY, "true");
 
-      // Verificar localStorage primero (más rápido)
-      const hasLocalAuth = localStorage.getItem(PERSISTENCE_KEY) === "true";
-      if (hasLocalAuth) {
-        console.log("Token local encontrado, considerando autenticado");
-        isAuthenticated.set(true);
-        return;
-      }
+      // Verificar autenticación
+      const hasAuth = localStorage.getItem(AUTH_KEY) === "true";
+      isAuthenticated.set(hasAuth);
 
-      // Si no estamos en la página de login, redirigir
-      if (!window.location.pathname.endsWith("/admin")) {
-        console.log("No autenticado y no en página de login, redirigiendo");
+      // Redireccionar si es necesario
+      if (!hasAuth && !window.location.pathname.endsWith("/admin")) {
         window.location.href = "/admin";
       }
-    } finally {
-      authCheckInProgress = false;
+    } catch (error) {
+      console.error("Error al verificar autenticación:", error);
+      // En caso de error, cerrar sesión
+      logout();
     }
   }
 
-  // Verificar autenticación cuando el DOM esté listo
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", checkAuthentication);
-  } else {
-    checkAuthentication();
-  }
+  // Verificar autenticación cuando el DOM esté cargado
+  document.addEventListener("DOMContentLoaded", checkAuthentication);
 
   // Manejar cierre de sesión
   document.getElementById("logout-btn")?.addEventListener("click", () => {
     console.log("Cerrando sesión...");
 
-    // Limpiar localStorage
-    localStorage.removeItem("devModeAuth");
-    localStorage.removeItem(PERSISTENCE_KEY);
-    localStorage.removeItem("authStatus");
+    // Limpiar almacenamiento
+    localStorage.removeItem(AUTH_KEY);
     sessionStorage.removeItem(SESSION_KEY);
 
-    // Actualizar estado de autenticación
+    // Actualizar estado
     isAuthenticated.set(false);
 
-    // Redireccionar a login
+    // Redireccionar
     window.location.href = "/admin";
   });
 </script>

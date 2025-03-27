@@ -5,7 +5,7 @@
 
 /**
  * Genera un mensaje de WhatsApp formateado para pedidos
- * Esta función evita los problemas de validación estricta de los IDs
+ * Versión mejorada con validación robusta y manejo de errores moderno
  *
  * @param {Object} items - Objeto con los items del carrito
  * @param {Number} total - Total del pedido
@@ -14,38 +14,26 @@
  */
 export function generateWhatsAppMessage(items, total, formattedTotal) {
   try {
+    // Validar entrada con destructuring y valores por defecto
+    const cartItems = items ?? {};
+    const cartTotal = total ?? 0;
+    const displayTotal = formattedTotal ?? formatPrice(cartTotal);
+
     // Verificar si hay items en el carrito
     if (
-      !items ||
-      typeof items !== "object" ||
-      Object.keys(items).length === 0
+      !cartItems ||
+      typeof cartItems !== "object" ||
+      Object.keys(cartItems).length === 0
     ) {
       console.warn("Carrito vacío o inválido al generar mensaje WhatsApp");
       return encodeURIComponent("Error: El carrito está vacío");
     }
 
-    // Función auxiliar para formatear precio
-    const formatPrice = (price) => {
-      try {
-        if (typeof price !== "number" || isNaN(price)) {
-          return "$0";
-        }
-        return new Intl.NumberFormat("es-CO", {
-          style: "currency",
-          currency: "COP",
-          minimumFractionDigits: 0,
-        }).format(price || 0);
-      } catch (err) {
-        console.warn("Error al formatear precio:", err);
-        return `$${price || 0}`;
-      }
-    };
-
     // Mensaje de cabecera
     let message = "🌿 *PEDIDO JAMUCHEE* 🌿\n\n*Productos seleccionados:*\n\n";
 
-    // Verificación adicional antes de procesar
-    const validItems = Object.values(items).filter(
+    // Filtrar items válidos usando métodos modernos
+    const validItems = Object.values(cartItems).filter(
       (item) => item && typeof item === "object" && item.name
     );
 
@@ -56,55 +44,50 @@ export function generateWhatsAppMessage(items, total, formattedTotal) {
       );
     }
 
-    // Añadir cada producto con detalle
-    validItems.forEach((item) => {
-      // Extraer datos seguros del item con valores por defecto para evitar errores
-      const name = item.name || "Producto";
-      const quantity =
-        typeof item.quantity === "number" && item.quantity > 0
-          ? item.quantity
-          : 1;
-      const price =
-        typeof item.price === "number" && !isNaN(item.price) ? item.price : 0;
-      const discountPrice =
-        typeof item.discountprice === "number" && !isNaN(item.discountprice)
-          ? item.discountprice
-          : 0;
+    // Crear los detalles de cada producto usando map
+    const productDetails = validItems.map((item) => {
+      // Extraer datos con destructuring y valores por defecto
+      const {
+        name = "Producto",
+        quantity = 1,
+        price = 0,
+        discountprice = 0,
+      } = item;
 
-      // Usar discountprice si está disponible y es mayor a cero
-      const priceToUse = discountPrice > 0 ? discountPrice : price;
+      // Validar valores numéricos
+      const safeQuantity =
+        Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
+      const safePrice = Number.isFinite(price) ? price : 0;
+      const safeDiscountPrice = Number.isFinite(discountprice)
+        ? discountprice
+        : 0;
 
-      // Calcular subtotal
-      const itemTotal = priceToUse * quantity;
+      // Calcular precio a usar y total
+      const priceToUse = safeDiscountPrice > 0 ? safeDiscountPrice : safePrice;
+      const itemTotal = priceToUse * safeQuantity;
 
-      // Formatear los precios
-      const formattedPrice = formatPrice(priceToUse);
-      const formattedItemTotal = formatPrice(itemTotal);
-
-      // Añadir línea para cada producto
-      message += `• *${quantity}x ${name}*\n`;
-      message += `  Precio: ${formattedPrice} c/u\n`;
-      message += `  Subtotal: ${formattedItemTotal}\n\n`;
+      // Construir sección del mensaje
+      return (
+        `• *${safeQuantity}x ${name}*\n` +
+        `  Precio: ${formatPrice(priceToUse)} c/u\n` +
+        `  Subtotal: ${formatPrice(itemTotal)}\n\n`
+      );
     });
 
-    // Verificar que tenemos un total formateado válido
-    let finalTotal = formattedTotal;
-    if (!formattedTotal || typeof formattedTotal !== "string") {
-      console.warn("Total formateado inválido, generando uno nuevo");
-      finalTotal = formatPrice(total || 0);
-    }
+    // Unir todas las secciones de productos
+    message += productDetails.join("");
 
-    // Añadir el total con formato
-    message += `*TOTAL DEL PEDIDO: ${finalTotal}*\n\n`;
+    // Añadir el total
+    message += `*TOTAL DEL PEDIDO: ${displayTotal}*\n\n`;
 
     // Texto de cierre
     message +=
-      "Por favor, indícame los siguientes datos para completar tu pedido:\n";
-    message += "- Nombre completo\n";
-    message += "- Dirección de entrega\n";
-    message += "- Ciudad\n";
-    message += "- Método de pago preferido\n\n";
-    message += "¡Gracias por tu compra en JAMUCHEE! 🌱";
+      "Por favor, indícame los siguientes datos para completar tu pedido:\n" +
+      "- Nombre completo\n" +
+      "- Dirección de entrega\n" +
+      "- Ciudad\n" +
+      "- Método de pago preferido\n\n" +
+      "¡Gracias por tu compra en JAMUCHEE! 🌱";
 
     console.log("Mensaje de WhatsApp generado exitosamente");
 
@@ -115,5 +98,25 @@ export function generateWhatsAppMessage(items, total, formattedTotal) {
     return encodeURIComponent(
       "Error al generar el mensaje. Por favor, contacta directamente a la tienda."
     );
+  }
+}
+
+/**
+ * Formatea un valor como precio en pesos colombianos
+ * @param {Number} price - Precio a formatear
+ * @returns {String} - Precio formateado
+ */
+function formatPrice(price) {
+  try {
+    if (!Number.isFinite(price)) return "$0";
+
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0,
+    }).format(price);
+  } catch (err) {
+    console.warn("Error al formatear precio:", err);
+    return `$${price || 0}`;
   }
 }

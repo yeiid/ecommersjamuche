@@ -1,0 +1,245 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getAllTips, getTipsByCategory } from "../../stores/tipsStore";
+
+// Obtener los tips por categoría
+const categorias = [
+  "Cactus",
+  "Suculentas",
+  "Materas",
+  "Riego",
+  "Plagas",
+  "General",
+];
+const tipsPorCategoria: { [key: string]: any[] } = {};
+
+// Obtener todos los tips
+const todosLosTips = await getAllTips();
+
+// Agrupar los tips por categoría
+for (const categoria of categorias) {
+  tipsPorCategoria[categoria] = todosLosTips.filter(
+    (tip) => tip.categoria === categoria
+  );
+}
+---
+
+<Layout title="Consejos de Cuidado | JAMUCHEE">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="text-center mb-12">
+      <h1
+        class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
+      >
+        Consejos para el Cuidado de tus Plantas
+      </h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+        Aprende a cuidar tus cactus, suculentas y materas con nuestros consejos
+        prácticos. Mantén tus plantas saludables y hermosas con estos tips
+        especializados.
+      </p>
+    </div>
+
+    <!-- Filtro de categorías -->
+    <div class="flex flex-wrap justify-center gap-3 mb-8">
+      <button
+        class="px-4 py-2 rounded-full bg-primary-100 text-primary-800 font-medium category-filter active"
+        data-category="todos"
+      >
+        Todos
+      </button>
+      {
+        categorias.map((categoria) => (
+          <button
+            class="px-4 py-2 rounded-full bg-gray-100 hover:bg-primary-100 text-gray-800 hover:text-primary-800 font-medium category-filter"
+            data-category={categoria}
+          >
+            {categoria}
+          </button>
+        ))
+      }
+    </div>
+
+    <!-- Tips organizados por categoría -->
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+      id="all-tips-container"
+    >
+      {
+        todosLosTips.map((tip) => (
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden tip-card"
+            data-category={tip.categoria}
+          >
+            {tip.imagen && (
+              <img
+                src={tip.imagen}
+                alt={tip.titulo}
+                class="w-full h-48 object-cover"
+              />
+            )}
+            <div class="p-6">
+              <span class="inline-block px-3 py-1 text-xs font-semibold text-primary-800 bg-primary-100 rounded-full mb-3">
+                {tip.categoria}
+              </span>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                {tip.titulo}
+              </h3>
+              <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                {tip.contenido}
+              </p>
+              <a
+                href={`/consejos/${tip.id}`}
+                class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 font-medium inline-flex items-center"
+              >
+                Leer más
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 ml-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <!-- Contenedores de categorías filtradas (inicialmente ocultos) -->
+    {
+      categorias.map((categoria) => (
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 hidden category-container"
+          id={`${categoria.toLowerCase()}-container`}
+        >
+          {tipsPorCategoria[categoria].map((tip) => (
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+              {tip.imagen && (
+                <img
+                  src={tip.imagen}
+                  alt={tip.titulo}
+                  class="w-full h-48 object-cover"
+                />
+              )}
+              <div class="p-6">
+                <span class="inline-block px-3 py-1 text-xs font-semibold text-primary-800 bg-primary-100 rounded-full mb-3">
+                  {tip.categoria}
+                </span>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                  {tip.titulo}
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                  {tip.contenido}
+                </p>
+                <a
+                  href={`/consejos/${tip.id}`}
+                  class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 font-medium inline-flex items-center"
+                >
+                  Leer más
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 ml-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      ))
+    }
+
+    <!-- Mensaje de no hay consejos -->
+    <div id="no-tips-message" class="text-center py-10 hidden">
+      <p class="text-xl text-gray-600 dark:text-gray-400">
+        Lo sentimos, aún no tenemos consejos en esta categoría.
+      </p>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  // Filtrado de categorías de consejos
+  document.addEventListener("DOMContentLoaded", () => {
+    const categoryButtons = document.querySelectorAll(".category-filter");
+    const allTipsContainer = document.getElementById("all-tips-container");
+    const categoryContainers = document.querySelectorAll(".category-container");
+    const noTipsMessage = document.getElementById("no-tips-message");
+
+    categoryButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        // Remover clase activa de todos los botones
+        categoryButtons.forEach((btn) =>
+          btn.classList.remove("active", "bg-primary-100", "text-primary-800")
+        );
+        categoryButtons.forEach((btn) =>
+          btn.classList.add("bg-gray-100", "text-gray-800")
+        );
+
+        // Añadir clase activa al botón seleccionado
+        button.classList.add("active", "bg-primary-100", "text-primary-800");
+        button.classList.remove("bg-gray-100", "text-gray-800");
+
+        const category = button.getAttribute("data-category");
+
+        if (category === "todos") {
+          // Mostrar todos los tips
+          if (allTipsContainer) allTipsContainer.classList.remove("hidden");
+          categoryContainers.forEach((container) =>
+            container.classList.add("hidden")
+          );
+          if (noTipsMessage) noTipsMessage.classList.add("hidden");
+        } else {
+          // Ocultar todos los tips
+          if (allTipsContainer) allTipsContainer.classList.add("hidden");
+          categoryContainers.forEach((container) =>
+            container.classList.add("hidden")
+          );
+
+          // Mostrar solo la categoría seleccionada
+          if (category) {
+            const categoryContainer = document.getElementById(
+              `${category.toLowerCase()}-container`
+            );
+
+            if (categoryContainer) {
+              const hasTips = categoryContainer.children.length > 0;
+
+              if (hasTips) {
+                categoryContainer.classList.remove("hidden");
+                if (noTipsMessage) noTipsMessage.classList.add("hidden");
+              } else {
+                if (noTipsMessage) noTipsMessage.classList.remove("hidden");
+              }
+            } else {
+              if (noTipsMessage) noTipsMessage.classList.remove("hidden");
+            }
+          }
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .category-filter.active {
+    @apply bg-primary-100 text-primary-800;
+  }
+</style>

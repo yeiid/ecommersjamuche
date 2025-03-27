@@ -1,6 +1,6 @@
 /* empty css                                              */
 import { c as createAstro, a as createComponent, e as renderComponent, r as renderScript, d as renderTemplate, m as maybeRenderHead } from '../../../../chunks/astro/server_W1JgSjoG.mjs';
-import { $ as $$AdminLayout } from '../../../../chunks/AdminLayout_DPn-Xsdm.mjs';
+import { $ as $$AdminLayout } from '../../../../chunks/AdminLayout_60b9Z0vy.mjs';
 import { $ as $$EspecieForm } from '../../../../chunks/EspecieForm_ClmrENFR.mjs';
 import { i as isAuthenticated } from '../../../../chunks/authStore_BVdcuBHI.mjs';
 import { a as getEspecieById } from '../../../../chunks/especiesStore_DaOR-YoS.mjs';

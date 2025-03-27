@@ -1,0 +1,333 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ProductCard from "../components/cards/ProductCard.astro";
+
+// Categorías disponibles
+const categories = [
+  { id: "todos", name: "Todos los productos" },
+  { id: "extractos", name: "Extractos" },
+  { id: "plantas", name: "Plantas" },
+  { id: "semillas", name: "Semillas" },
+  { id: "accesorios", name: "Accesorios" },
+];
+
+// Datos de productos (en un proyecto real esto vendría de una API o CMS)
+const products = [
+  {
+    id: "1",
+    name: "Extracto de Cannabis",
+    price: 85000,
+    discountPrice: 75000,
+    image:
+      "https://images.unsplash.com/photo-1628542065089-1f1587564502?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+    description:
+      "Extracto natural de cannabis con propiedades medicinales. Ideal para tratamientos terapéuticos.",
+    rating: 4.5,
+    category: "extractos",
+    isNew: true,
+    isFeatured: true,
+  },
+  {
+    id: "2",
+    name: "Semillas de Marihuana",
+    price: 45000,
+    discountPrice: 0,
+    image:
+      "https://images.unsplash.com/photo-1616407746534-a58befda7d83?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+    description:
+      "Pack de semillas orgánicas de marihuana para cultivo personal.",
+    rating: 5,
+    category: "semillas",
+    isNew: false,
+    isFeatured: true,
+  },
+  {
+    id: "3",
+    name: "Planta de Cannabis Medicinal",
+    price: 120000,
+    discountPrice: 99000,
+    image:
+      "https://images.unsplash.com/photo-1536689318884-51b09dfe7e74?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+    description: "Planta viva de cannabis medicinal lista para trasplantar.",
+    rating: 4,
+    category: "plantas",
+    isNew: true,
+    isFeatured: false,
+  },
+  {
+    id: "4",
+    name: "Grinder de Aluminio",
+    price: 35000,
+    discountPrice: 29000,
+    image:
+      "https://images.unsplash.com/photo-1508963493744-76fce69379c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+    description: "Grinder de aluminio de alta calidad, diseño de 4 piezas.",
+    rating: 4.8,
+    category: "accesorios",
+    isNew: false,
+    isFeatured: true,
+  },
+  {
+    id: "5",
+    name: "Aceite de CBD",
+    price: 65000,
+    discountPrice: 0,
+    image:
+      "https://images.unsplash.com/photo-1614859465898-24a1f9f1c175?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+    description: "Aceite de CBD puro, 500mg, para uso terapéutico.",
+    rating: 4.6,
+    category: "extractos",
+    isNew: false,
+    isFeatured: true,
+  },
+  {
+    id: "6",
+    name: "Kit de Cultivo Completo",
+    price: 250000,
+    discountPrice: 199000,
+    image:
+      "https://images.unsplash.com/photo-1523246224990-496e9a19113a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+    description:
+      "Kit completo para cultivo indoor: luces, macetas, sustrato y más.",
+    rating: 4.9,
+    category: "accesorios",
+    isNew: true,
+    isFeatured: true,
+  },
+  {
+    id: "7",
+    name: "Semillas Autoflorecientes",
+    price: 55000,
+    discountPrice: 49000,
+    image:
+      "https://images.unsplash.com/photo-1568043477799-700c9615b640?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+    description: "Pack de semillas autoflorecientes de alta calidad.",
+    rating: 4.7,
+    category: "semillas",
+    isNew: false,
+    isFeatured: false,
+  },
+  {
+    id: "8",
+    name: "Planta CBD Sativa",
+    price: 110000,
+    discountPrice: 0,
+    image:
+      "https://images.unsplash.com/photo-1632255086813-ceab95b99b00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+    description: "Planta de cannabis Sativa con alto contenido de CBD.",
+    rating: 4.4,
+    category: "plantas",
+    isNew: true,
+    isFeatured: false,
+  },
+];
+---
+
+<Layout title="Productos | JAMUCHEE">
+  <div class="container mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white">
+      Nuestros Productos
+    </h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Sidebar con filtros -->
+      <div class="lg:col-span-1">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+          <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+            Filtrar por categoría
+          </h2>
+          <div class="space-y-2" id="category-filters">
+            {
+              categories.map((category) => (
+                <div class="flex items-center">
+                  <input
+                    type="radio"
+                    id={`category-${category.id}`}
+                    name="category"
+                    value={category.id}
+                    class="h-4 w-4 text-primary-600 focus:ring-primary-500"
+                    checked={category.id === "todos"}
+                  />
+                  <label
+                    for={`category-${category.id}`}
+                    class="ml-2 text-gray-700 dark:text-gray-300"
+                  >
+                    {category.name}
+                  </label>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+            Búsqueda
+          </h2>
+          <div class="relative">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Buscar productos..."
+              class="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <span
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                  clip-rule="evenodd"></path>
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de productos -->
+      <div class="lg:col-span-3">
+        <div
+          id="products-container"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {
+            products.map((product) => (
+              <ProductCard
+                id={product.id}
+                name={product.name}
+                price={product.price}
+                discountPrice={product.discountPrice}
+                image={product.image}
+                description={product.description}
+                rating={product.rating}
+                category={product.category}
+                isNew={product.isNew}
+                isFeatured={product.isFeatured}
+              />
+            ))
+          }
+        </div>
+
+        <!-- Mensaje cuando no hay resultados -->
+        <div id="no-results" class="hidden text-center py-12">
+          <p class="text-xl font-medium text-gray-600 dark:text-gray-400">
+            No se encontraron productos que coincidan con tu búsqueda.
+          </p>
+          <p class="mt-2 text-gray-500 dark:text-gray-500">
+            Intenta con otros términos o categorías.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Filtrar productos por categoría y búsqueda
+  document.addEventListener("DOMContentLoaded", () => {
+    // Elementos DOM
+    const productsContainer = document.getElementById("products-container");
+    const noResults = document.getElementById("no-results");
+    const searchInput = document.getElementById("search-input");
+    const categoryFilters = document.querySelectorAll('input[name="category"]');
+
+    // Productos originales (los convertimos de elementos DOM a objetos)
+    const productElements = document.querySelectorAll("[data-product-id]");
+    const allProducts = Array.from(productElements).map((el) => {
+      return {
+        element: el,
+        id: el.getAttribute("data-product-id"),
+        name: el.getAttribute("data-product-name")?.toLowerCase() || "",
+        category: el.getAttribute("data-product-category") || "",
+        description:
+          el.getAttribute("data-product-description")?.toLowerCase() || "",
+      };
+    });
+
+    // Función para filtrar productos
+    const filterProducts = () => {
+      const searchTerm = searchInput
+        ? (searchInput as HTMLInputElement).value.toLowerCase()
+        : "";
+      const selectedCategory = document.querySelector(
+        'input[name="category"]:checked'
+      ) as HTMLInputElement;
+      const categoryValue = selectedCategory ? selectedCategory.value : "todos";
+
+      let filteredProducts = allProducts;
+
+      // Filtrar por categoría
+      if (categoryValue !== "todos") {
+        filteredProducts = filteredProducts.filter(
+          (product) => product.category === categoryValue
+        );
+      }
+
+      // Filtrar por término de búsqueda
+      if (searchTerm) {
+        filteredProducts = filteredProducts.filter(
+          (product) =>
+            product.name.includes(searchTerm) ||
+            product.description.includes(searchTerm)
+        );
+      }
+
+      // Mostrar u ocultar productos
+      allProducts.forEach((product) => {
+        const shouldShow = filteredProducts.includes(product);
+        product.element.classList.toggle("hidden", !shouldShow);
+      });
+
+      // Mostrar mensaje de "no hay resultados" si es necesario
+      if (noResults) {
+        noResults.classList.toggle("hidden", filteredProducts.length > 0);
+      }
+
+      if (productsContainer) {
+        productsContainer.classList.toggle(
+          "hidden",
+          filteredProducts.length === 0
+        );
+      }
+    };
+
+    // Event listeners
+    if (searchInput) {
+      searchInput.addEventListener("input", filterProducts);
+    }
+
+    categoryFilters.forEach((filter) => {
+      filter.addEventListener("change", filterProducts);
+    });
+
+    // Añadir atributos data a las tarjetas de productos para hacerlos filtrables
+    const productCards = document.querySelectorAll(".product-card");
+    productCards.forEach((card) => {
+      const id = card.getAttribute("id");
+      const nameEl = card.querySelector(".product-name");
+      const categoryEl = card.querySelector(".product-category");
+      const descriptionEl = card.querySelector(".product-description");
+
+      if (id) card.setAttribute("data-product-id", id);
+      if (nameEl)
+        card.setAttribute("data-product-name", nameEl.textContent || "");
+      if (categoryEl)
+        card.setAttribute(
+          "data-product-category",
+          categoryEl.textContent || ""
+        );
+      if (descriptionEl)
+        card.setAttribute(
+          "data-product-description",
+          descriptionEl.textContent || ""
+        );
+    });
+  });
+</script>
+

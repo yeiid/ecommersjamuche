@@ -1,8 +1,8 @@
 /* empty css                                              */
 import { c as createAstro, a as createComponent, e as renderComponent, d as renderTemplate, m as maybeRenderHead } from '../../../../chunks/astro/server_W1JgSjoG.mjs';
-import { $ as $$AdminLayout } from '../../../../chunks/AdminLayout_DPn-Xsdm.mjs';
+import { $ as $$AdminLayout } from '../../../../chunks/AdminLayout_60b9Z0vy.mjs';
 import { $ as $$ProductForm } from '../../../../chunks/ProductForm_Cdlu-eq2.mjs';
-import { a as getProductById } from '../../../../chunks/productStore_DtJKtsz8.mjs';
+import { a as getProductById } from '../../../../chunks/productStore_Dh91h6xp.mjs';
 export { renderers } from '../../../../renderers.mjs';
 
 const $$Astro = createAstro("https://jamuchee.com");

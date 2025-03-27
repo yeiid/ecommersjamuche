@@ -1,6 +1,6 @@
 /* empty css                                           */
 import { a as createComponent, e as renderComponent, d as renderTemplate, m as maybeRenderHead } from '../../../chunks/astro/server_W1JgSjoG.mjs';
-import { $ as $$AdminLayout } from '../../../chunks/AdminLayout_DPn-Xsdm.mjs';
+import { $ as $$AdminLayout } from '../../../chunks/AdminLayout_60b9Z0vy.mjs';
 import { $ as $$ProductForm } from '../../../chunks/ProductForm_Cdlu-eq2.mjs';
 export { renderers } from '../../../renderers.mjs';
 

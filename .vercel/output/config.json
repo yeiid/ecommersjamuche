@@ -24,6 +24,10 @@
 			"dest": "_render"
 		},
 		{
+			"src": "^/admin/diagnostico/?$",
+			"dest": "_render"
+		},
+		{
 			"src": "^/admin/especies/editar/([^/]+?)/?$",
 			"dest": "_render"
 		},
@@ -53,6 +57,54 @@
 		},
 		{
 			"src": "^/admin/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/admin/import-products/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/carrito/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/consejos/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/contacto/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/especies/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/lista-deseos/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/nosotros/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/producto/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/productos/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/proyectos/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/recomendaciones/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/$",
 			"dest": "_render"
 		}
 	],

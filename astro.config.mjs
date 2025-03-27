@@ -8,14 +8,20 @@ import svelte from "@astrojs/svelte";
 export default defineConfig({
   site: "https://jamuchee.com",
   integrations: [tailwind(), svelte()],
-  // Mantener "static" para compatibilidad
-  output: "static",
+  // Cambiar de "static" a "server" para mejor compatibilidad con Vercel
+  output: "server",
   adapter: vercel({
     webAnalytics: {
       enabled: true,
     },
-    // Habilitar opciones adicionales de Vercel si están disponibles
+    // Habilitar opciones adicionales de Vercel
     imageService: true,
+    // Habilitar funciones Edge para mejor rendimiento
+    edgeMiddleware: true,
+    // Optimizar para velocidad de respuesta
+    speedInsights: {
+      enabled: true,
+    },
   }),
   // Configuración de servidor para arreglar problemas de WebSocket
   server: {

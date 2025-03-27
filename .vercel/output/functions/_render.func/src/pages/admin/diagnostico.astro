@@ -1,0 +1,405 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import {
+  testSupabaseConnection,
+  supabase,
+  supabaseUrl,
+} from "../../lib/supabase";
+import { isAuthenticated } from "../../stores/authStore";
+
+// Verificar autenticación
+let authValue = false;
+const unsubscribe = isAuthenticated.subscribe((value) => {
+  authValue = value;
+});
+unsubscribe();
+
+// Redireccionar si no está autenticado
+if (!authValue && Astro.request.headers.get("sec-fetch-dest") !== "document") {
+  return Astro.redirect("/admin");
+}
+
+// Determinar el entorno
+const isDevelopment = import.meta.env.MODE === "development";
+---
+
+<Layout title="Diagnóstico del Sistema - JAMUCHEE">
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+      <h1
+        class="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center"
+      >
+        Herramientas de Diagnóstico del Sistema
+      </h1>
+
+      <!-- Información de configuración -->
+      <section class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          Información de Configuración
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+              Entorno
+            </p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {isDevelopment ? "Desarrollo" : "Producción"}
+            </p>
+          </div>
+
+          <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+              Supabase URL
+            </p>
+            <p class="font-medium text-gray-900 dark:text-white break-all">
+              {supabaseUrl || "No configurado"}
+            </p>
+          </div>
+
+          <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+              Supabase Anon Key
+            </p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {
+                import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+                  ? "Configurado correctamente"
+                  : "No configurado"
+              }
+            </p>
+          </div>
+
+          <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+              Service Role Key
+            </p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {
+                import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+                  ? "Configurado correctamente"
+                  : "No configurado"
+              }
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pruebas de conectividad -->
+      <section class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          Pruebas de Conectividad
+        </h2>
+
+        <div class="space-y-6">
+          <!-- Prueba 1: Conexión básica -->
+          <div>
+            <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+              1. Conexión básica con Supabase
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">
+              Verifica si se puede establecer una conexión básica con el
+              servidor de Supabase.
+            </p>
+
+            <div class="flex space-x-3 mb-2">
+              <button
+                id="test-connection"
+                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
+              >
+                Probar conexión
+              </button>
+            </div>
+
+            <div id="connection-result" class="hidden p-4 rounded-md mt-2">
+            </div>
+          </div>
+
+          <!-- Prueba 2: Autenticación -->
+          <div>
+            <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+              2. Verificar sesión de autenticación
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">
+              Comprueba si existe una sesión de autenticación válida.
+            </p>
+
+            <div class="flex space-x-3 mb-2">
+              <button
+                id="test-auth"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+              >
+                Verificar autenticación
+              </button>
+            </div>
+
+            <div id="auth-result" class="hidden p-4 rounded-md mt-2"></div>
+          </div>
+
+          <!-- Prueba 3: Acceso a la base de datos -->
+          <div>
+            <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+              3. Acceso a la base de datos
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">
+              Intenta consultar la tabla de especies para verificar el acceso a
+              datos.
+            </p>
+
+            <div class="flex space-x-3 mb-2">
+              <button
+                id="test-db"
+                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md"
+              >
+                Probar acceso a datos
+              </button>
+            </div>
+
+            <div id="db-result" class="hidden p-4 rounded-md mt-2"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Enlaces útiles -->
+      <section class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          Enlaces Útiles
+        </h2>
+
+        <ul class="space-y-2 list-disc pl-5 text-gray-600 dark:text-gray-400">
+          <li>
+            <a
+              href={supabaseUrl || "https://app.supabase.com"}
+              target="_blank"
+              class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline"
+            >
+              Panel de control de Supabase
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://supabase.com/docs"
+              target="_blank"
+              class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline"
+            >
+              Documentación de Supabase
+            </a>
+          </li>
+          <li>
+            <a
+              href="/admin/dashboard"
+              class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline"
+            >
+              Volver al Dashboard
+            </a>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { supabase, testSupabaseConnection } from "../../lib/supabase";
+
+  // Función para mostrar resultados de manera bonita
+  function showResult(
+    element: HTMLElement | null,
+    success: boolean,
+    message: string,
+    details: any = null
+  ) {
+    if (!element) return;
+
+    element.classList.remove(
+      "hidden",
+      "bg-green-100",
+      "bg-red-100",
+      "bg-amber-100"
+    );
+    element.classList.add(success ? "bg-green-100" : "bg-red-100");
+
+    let content = `<p class="font-medium ${success ? "text-green-700" : "text-red-700"}">${message}</p>`;
+
+    if (details) {
+      if (typeof details === "object") {
+        try {
+          // Para objetos, mostrar un resumen más legible
+          if ("session" in details && details.session) {
+            const session = details.session;
+            const expiresAt = session.expires_at
+              ? new Date(session.expires_at * 1000).toLocaleString()
+              : "Desconocido";
+
+            content += `
+              <div class="mt-2 text-sm">
+                <p><span class="font-medium">Usuario:</span> ${session.user?.email || "Desconocido"}</p>
+                <p><span class="font-medium">Expira:</span> ${expiresAt}</p>
+              </div>
+            `;
+          } else if ("count" in details) {
+            content += `
+              <div class="mt-2 text-sm">
+                <p><span class="font-medium">Especies encontradas:</span> ${details.count || 0}</p>
+              </div>
+            `;
+          } else {
+            // Si no es un tipo conocido, convertir a JSON para mostrar
+            content += `<pre class="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-md text-xs overflow-auto max-h-40">${JSON.stringify(details, null, 2)}</pre>`;
+          }
+        } catch (e) {
+          content += `<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">No se pudo mostrar detalles adicionales.</p>`;
+        }
+      } else {
+        content += `<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">${details}</p>`;
+      }
+    }
+
+    element.innerHTML = content;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Prueba 1: Conexión básica
+    const testConnectionBtn = document.getElementById(
+      "test-connection"
+    ) as HTMLButtonElement | null;
+    const connectionResult = document.getElementById("connection-result");
+
+    if (testConnectionBtn && connectionResult) {
+      testConnectionBtn.addEventListener("click", async () => {
+        // Cambiar apariencia del botón
+        testConnectionBtn.textContent = "Probando...";
+        testConnectionBtn.disabled = true;
+
+        try {
+          const result = await testSupabaseConnection();
+
+          if (result.success) {
+            showResult(
+              connectionResult,
+              true,
+              "✅ Conexión exitosa con Supabase",
+              result.data
+            );
+          } else {
+            showResult(
+              connectionResult,
+              false,
+              "❌ No se pudo conectar con Supabase",
+              result.error
+            );
+          }
+        } catch (error) {
+          showResult(
+            connectionResult,
+            false,
+            "❌ Error al probar la conexión",
+            error
+          );
+        } finally {
+          // Restaurar botón
+          testConnectionBtn.textContent = "Probar conexión";
+          testConnectionBtn.disabled = false;
+        }
+      });
+    }
+
+    // Prueba 2: Autenticación
+    const testAuthBtn = document.getElementById(
+      "test-auth"
+    ) as HTMLButtonElement | null;
+    const authResult = document.getElementById("auth-result");
+
+    if (testAuthBtn && authResult) {
+      testAuthBtn.addEventListener("click", async () => {
+        // Cambiar apariencia del botón
+        testAuthBtn.textContent = "Verificando...";
+        testAuthBtn.disabled = true;
+
+        try {
+          const { data: sessionData, error: sessionError } =
+            await supabase.auth.getSession();
+
+          if (sessionError) {
+            showResult(
+              authResult,
+              false,
+              "❌ Error al verificar la sesión",
+              sessionError
+            );
+          } else if (sessionData.session) {
+            showResult(
+              authResult,
+              true,
+              "✅ Sesión de autenticación válida",
+              sessionData
+            );
+          } else {
+            showResult(
+              authResult,
+              false,
+              "⚠️ No hay sesión de autenticación activa",
+              "Deberías iniciar sesión para acceder a funcionalidades protegidas."
+            );
+          }
+        } catch (error) {
+          showResult(
+            authResult,
+            false,
+            "❌ Error grave al verificar la autenticación",
+            error
+          );
+        } finally {
+          // Restaurar botón
+          testAuthBtn.textContent = "Verificar autenticación";
+          testAuthBtn.disabled = false;
+        }
+      });
+    }
+
+    // Prueba 3: Acceso a la base de datos
+    const testDbBtn = document.getElementById(
+      "test-db"
+    ) as HTMLButtonElement | null;
+    const dbResult = document.getElementById("db-result");
+
+    if (testDbBtn && dbResult) {
+      testDbBtn.addEventListener("click", async () => {
+        // Cambiar apariencia del botón
+        testDbBtn.textContent = "Probando...";
+        testDbBtn.disabled = true;
+
+        try {
+          const { data, error, count } = await supabase
+            .from("especies")
+            .select("*", { count: "exact" })
+            .limit(1);
+
+          if (error) {
+            showResult(
+              dbResult,
+              false,
+              "❌ Error al acceder a la base de datos",
+              error
+            );
+          } else {
+            showResult(dbResult, true, "✅ Acceso exitoso a la base de datos", {
+              count,
+            });
+          }
+        } catch (error) {
+          showResult(
+            dbResult,
+            false,
+            "❌ Error grave al acceder a la base de datos",
+            error
+          );
+        } finally {
+          // Restaurar botón
+          testDbBtn.textContent = "Probar acceso a datos";
+          testDbBtn.disabled = false;
+        }
+      });
+    }
+  });
+</script>

@@ -10,13 +10,8 @@
       "maxDuration": 10
     }
   },
-  "routes": [
-    { "handle": "filesystem" },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "cleanUrls": true,
   "env": {
     "PUBLIC_SUPABASE_URL": "SUPABASE_URL_PLACEHOLDER",
     "PUBLIC_SUPABASE_ANON_KEY": "SUPABASE_ANON_KEY_PLACEHOLDER"

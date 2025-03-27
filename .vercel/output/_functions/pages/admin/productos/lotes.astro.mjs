@@ -1,6 +1,6 @@
 /* empty css                                           */
 import { a as createComponent, d as renderTemplate, r as renderScript, b as addAttribute, m as maybeRenderHead, e as renderComponent } from '../../../chunks/astro/server_W1JgSjoG.mjs';
-import { $ as $$AdminLayout } from '../../../chunks/AdminLayout_DPn-Xsdm.mjs';
+import { $ as $$AdminLayout } from '../../../chunks/AdminLayout_60b9Z0vy.mjs';
 export { renderers } from '../../../renderers.mjs';
 
 var __freeze = Object.freeze;

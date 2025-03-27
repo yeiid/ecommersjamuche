@@ -1,8 +1,8 @@
 /* empty css                                        */
 import { c as createAstro, a as createComponent, e as renderComponent, r as renderScript, d as renderTemplate, m as maybeRenderHead, b as addAttribute } from '../../chunks/astro/server_W1JgSjoG.mjs';
-import { $ as $$AdminLayout } from '../../chunks/AdminLayout_DPn-Xsdm.mjs';
+import { $ as $$AdminLayout } from '../../chunks/AdminLayout_60b9Z0vy.mjs';
 import { i as isAuthenticated } from '../../chunks/authStore_BVdcuBHI.mjs';
-import { g as getAllProducts } from '../../chunks/productStore_DtJKtsz8.mjs';
+import { g as getAllProducts } from '../../chunks/productStore_Dh91h6xp.mjs';
 import { g as getAllEspecies } from '../../chunks/especiesStore_DaOR-YoS.mjs';
 export { renderers } from '../../renderers.mjs';
 

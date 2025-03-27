@@ -1,0 +1,1 @@
+import{g as t}from"./recommendationsStore.vBwpm_-S.js";import"./cartStore.CCaFZ5TA.js";import"./client.schema.D9gTZs88.js";import"./index.9eZ28vGx.js";import"./wishlistStore.DdiVJu_S.js";document.addEventListener("DOMContentLoaded",()=>{t()});

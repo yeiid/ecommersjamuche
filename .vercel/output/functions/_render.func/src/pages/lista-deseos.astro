@@ -1,0 +1,213 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Button from "../components/ui/Button.astro";
+---
+
+<Layout title="Lista de Deseos | JAMUCHEE">
+  <div class="container mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white">
+      Mi Lista de Deseos
+    </h1>
+
+    <div id="wishlist-container">
+      <!-- Mensaje cuando la lista está vacía -->
+      <div id="empty-wishlist-message" class="hidden text-center py-8">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+          ></path>
+        </svg>
+        <p class="text-xl font-medium text-gray-600 dark:text-gray-400">
+          Tu lista de deseos está vacía
+        </p>
+        <div class="mt-6">
+          <a
+            href="/productos"
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            Explorar productos
+          </a>
+        </div>
+      </div>
+
+      <!-- Contenedor de productos -->
+      <div
+        id="wishlist-items-container"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <!-- Aquí se cargarán dinámicamente los productos -->
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { wishlistItems, removeFromWishlist } from "../stores/wishlistStore";
+  import { addToCart } from "../stores/cartStore";
+
+  // Definir interfaz para items de la lista de deseos
+  interface WishlistItem {
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+    description?: string;
+    discountPrice?: number;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const wishlistItemsContainer = document.getElementById(
+      "wishlist-items-container"
+    );
+    const emptyWishlistMessage = document.getElementById(
+      "empty-wishlist-message"
+    );
+
+    // Formatear precio en pesos colombianos
+    const formatPrice = (price: number): string => {
+      return new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0,
+      }).format(price);
+    };
+
+    // Renderizar los productos de la lista de deseos
+    const renderWishlistItems = (items: Record<string, WishlistItem>): void => {
+      if (!wishlistItemsContainer || !emptyWishlistMessage) return;
+
+      if (Object.keys(items).length === 0) {
+        emptyWishlistMessage.classList.remove("hidden");
+        wishlistItemsContainer.innerHTML = "";
+        return;
+      }
+
+      emptyWishlistMessage.classList.add("hidden");
+
+      let itemsHTML = "";
+
+      for (const [id, item] of Object.entries(items)) {
+        const formattedPrice = formatPrice(item.price);
+        const formattedDiscountPrice = item.discountPrice
+          ? formatPrice(item.discountPrice)
+          : null;
+        const displayPrice = formattedDiscountPrice || formattedPrice;
+        const hasDiscount = !!formattedDiscountPrice;
+
+        itemsHTML += `
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col" data-id="${id}">
+            <div class="relative">
+              <a href="/producto/${id}">
+                <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-cover">
+              </a>
+              ${
+                hasDiscount
+                  ? `
+                <span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
+                  OFERTA
+                </span>
+              `
+                  : ""
+              }
+            </div>
+            
+            <div class="p-4 flex-grow flex flex-col">
+              <div class="flex-grow">
+                <a href="/producto/${id}" class="block hover:text-primary-600 transition-colors">
+                  <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-1">${item.name}</h3>
+                </a>
+                
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                  ${item.description || ""}
+                </p>
+              </div>
+              
+              <div class="mt-auto">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    ${
+                      hasDiscount
+                        ? `
+                      <span class="text-gray-500 dark:text-gray-400 text-sm line-through">${formattedPrice}</span>
+                      <div class="text-lg font-bold text-gray-800 dark:text-white">${formattedDiscountPrice}</div>
+                    `
+                        : `
+                      <div class="text-lg font-bold text-gray-800 dark:text-white">${formattedPrice}</div>
+                    `
+                    }
+                  </div>
+                </div>
+                
+                <div class="flex space-x-2">
+                  <button 
+                    class="add-to-cart-btn flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                    data-id="${id}"
+                  >
+                    Añadir al carrito
+                  </button>
+                  <button 
+                    class="remove-wishlist-btn inline-flex items-center justify-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 dark:text-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                    data-id="${id}"
+                    aria-label="Eliminar de la lista de deseos"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      wishlistItemsContainer.innerHTML = itemsHTML;
+
+      // Añadir event listeners a los botones
+      document.querySelectorAll(".add-to-cart-btn").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          const target = e.currentTarget as HTMLButtonElement;
+          const id = target.getAttribute("data-id") || "";
+          const item = items[id];
+          if (item) {
+            addToCart({
+              id: item.id,
+              name: item.name,
+              price: item.discountPrice || item.price,
+              image: item.image,
+              description: item.description,
+            });
+
+            // Feedback visual
+            const originalText = target.textContent || "";
+            target.textContent = "✓ Añadido";
+            setTimeout(() => {
+              target.textContent = originalText;
+            }, 1500);
+          }
+        });
+      });
+
+      document.querySelectorAll(".remove-wishlist-btn").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          const target = e.currentTarget as HTMLButtonElement;
+          const id = target.getAttribute("data-id") || "";
+          removeFromWishlist(id);
+        });
+      });
+    };
+
+    // Inicializar y suscribirse a cambios
+    renderWishlistItems(wishlistItems.get());
+    wishlistItems.subscribe(renderWishlistItems);
+  });
+</script>
