@@ -4,9 +4,11 @@ import AdminPanel from "../../components/admin/AdminPanel.svelte";
 
 // Verificar sesión
 const session = Astro.cookies.get("admin_session");
-if (!session || session.value !== "authenticated") {
+if (!session || !session.value.startsWith("role:")) {
   return Astro.redirect("/admin/login");
 }
+
+const role = session.value.startsWith("role:super") ? "super" : "admin";
 ---
 
 <Layout title="Administración" description="Panel de control para gestionar tu tienda.">
@@ -17,7 +19,7 @@ if (!session || session.value !== "authenticated") {
         <p class="section-subtitle mx-auto">Gestiona tus productos y configuración de forma sencilla</p>
       </div>
 
-      <AdminPanel client:only="svelte" />
+      <AdminPanel client:only="svelte" role={role} />
     </div>
   </section>
 </Layout>

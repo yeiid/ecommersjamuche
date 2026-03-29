@@ -1,10 +1,13 @@
 <script>
   import { onMount } from "svelte";
   import { fade, slide, scale } from "svelte/transition";
+  import { Package, Settings, Save, Plus, Trash2, Image as ImageIcon, LogOut, CheckCircle2, Search, Filter, Users } from "lucide-svelte";
   import { storeConfig } from "../../config/store.config"; // For types only
 
+  let { role = "admin" } = $props();
   let config = $state(null);
-  let activeTab = $state("general"); // "general", "productos", "about"
+  let activeTab = $state("general"); // "general", "productos", "about", "usuarios"
+  let users = $state([]); // Solo para súper admin
   let isSaving = $state(false);
   let feedback = $state("");
   let feedbackType = $state("success"); // "success" or "error"
@@ -116,7 +119,69 @@
     ];
   }
 
-  onMount(loadData);
+  /**
+   * Cargar usuarios (Solo para Súper Admin)
+   */
+  async function loadUsers() {
+    try {
+      const response = await fetch("/api/users.json");
+      if (response.ok) {
+        users = await response.json();
+      }
+    } catch (e) {
+      console.error("Error cargando usuarios:", e);
+    }
+  }
+
+  async function addUser() {
+    const username = prompt("Nombre de usuario para el cliente:");
+    const password = prompt("Contraseña:");
+    const name = prompt("Nombre Empresa:");
+    
+    if (!username || !password) return;
+
+    const newUser = {
+      id: Date.now().toString(),
+      username,
+      password,
+      name: name || username,
+      role: 'admin'
+    };
+
+    try {
+      const response = await fetch("/api/users.json", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUser)
+      });
+      if (response.ok) {
+        users = [...users, newUser];
+        showFeedback("Usuario creado");
+      }
+    } catch (e) {
+      showFeedback("Error al crear", "error");
+    }
+  }
+
+  async function deleteUser(id) {
+    if (!confirm("¿Eliminar usuario?")) return;
+    try {
+      const response = await fetch(`/api/users.json?id=${id}`, {
+        method: "DELETE"
+      });
+      if (response.ok) {
+        users = users.filter((u) => u.id !== id);
+        showFeedback("Usuario eliminado");
+      }
+    } catch (e) {
+      showFeedback("Error");
+    }
+  }
+
+  onMount(() => {
+    loadData();
+    if (role === 'super') loadUsers();
+  });
 </script>
 
 {#if !config}
@@ -170,6 +235,17 @@
             <span class="sm:hidden">📖</span>
             <span class="hidden sm:inline">📖 Nosotros</span>
           </button>
+          
+          {#if role === 'super'}
+            <button 
+              onclick={() => activeTab = 'usuarios'}
+              class:active={activeTab === 'usuarios'}
+              class="tab-btn"
+            >
+              <span class="sm:hidden">🔑</span>
+              <span class="hidden sm:inline">🔑 Usuarios / Suscripciones</span>
+            </button>
+          {/if}
         </nav>
 
         <!-- Global Save Action -->
@@ -386,6 +462,68 @@
               </div>
             {/each}
           </div>
+        </div>
+
+      {:else if activeTab === 'usuarios'}
+        <!-- 🔑 SUPER ADMIN: USER MANAGEMENT -->
+        <div transition:fade class="space-y-8 pb-10">
+          <section class="glass-card p-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+              <div>
+                <h2 class="text-2xl font-black flex items-center gap-3 text-slate-900 dark:text-white">
+                  <span class="w-12 h-12 rounded-2xl bg-yellow-400 flex items-center justify-center text-xl shadow-lg shadow-yellow-500/20">🔑</span>
+                  Gestión de Clientes / Usuarios
+                </h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Crea y administra los accesos para tus clientes de e-commerce.</p>
+              </div>
+              <button onclick={addUser} class="btn-save !px-8 !py-4 !rounded-2xl">
+                <span>Crear Nuevo Cliente +</span>
+              </button>
+            </div>
+
+            <div class="overflow-hidden rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
+                    <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Cliente / Empresa</th>
+                    <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Usuario</th>
+                    <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Rol</th>
+                    <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                  {#each users as u}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                      <td class="px-6 py-5">
+                        <div class="font-bold text-slate-900 dark:text-white">{u.name}</div>
+                      </td>
+                      <td class="px-6 py-5">
+                        <code class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs text-yellow-600 font-bold">{u.username}</code>
+                      </td>
+                      <td class="px-6 py-5">
+                        <span class="text-[10px] font-black uppercase px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full">
+                          {u.role}
+                        </span>
+                      </td>
+                      <td class="px-6 py-5 text-right">
+                        <button onclick={() => deleteUser(u.id)} class="text-rose-500 hover:text-rose-700 font-bold text-xs p-2 transition-colors">
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  {/each}
+                  {#if users.length === 0}
+                    <tr>
+                      <td colspan="4" class="px-6 py-20 text-center">
+                        <div class="text-slate-300 dark:text-slate-700 mb-2">No hay clientes creados aún.</div>
+                        <button onclick={addUser} class="text-yellow-500 text-xs font-bold hover:underline">Crear el primero ahora</button>
+                      </td>
+                    </tr>
+                  {/if}
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
 
       {:else}

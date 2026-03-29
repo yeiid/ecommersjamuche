@@ -4,7 +4,7 @@ import { storeConfig } from "../../config/store.config";
 
 // Si ya hay una cookie de sesión, redirigir al panel
 const session = Astro.cookies.get("admin_session");
-if (session?.value === "authenticated") {
+if (session?.value?.startsWith("role:")) {
   return Astro.redirect("/admin");
 }
 ---
@@ -22,11 +22,24 @@ if (session?.value === "authenticated") {
             </div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Panel de Control</h1>
             <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">
-              Ingresa la contraseña para administrar <strong>{storeConfig.name}</strong>
+              Ingresa tus credenciales para administrar <strong>{storeConfig.name}</strong>
             </p>
           </div>
 
           <form id="login-form" class="space-y-6">
+            <div class="space-y-2">
+              <label for="username" class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Usuario (Opcional para Súper Admin)
+              </label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Nombre de usuario"
+                class="input w-full"
+              />
+            </div>
+
             <div class="space-y-2">
               <label for="password" class="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Contraseña
@@ -42,7 +55,7 @@ if (session?.value === "authenticated") {
             </div>
 
             <div id="error-message" class="hidden p-3 rounded-lg bg-rose-50 text-rose-700 text-xs font-medium text-center animate-shake">
-              Contraseña incorrecta. Por favor reintenta.
+              Credenciales incorrectas. Por favor reintenta.
             </div>
 
             <button
@@ -78,6 +91,7 @@ if (session?.value === "authenticated") {
       e.preventDefault();
       
       const formData = new FormData(form);
+      const username = formData.get("username");
       const password = formData.get("password");
 
       // Reset UI
@@ -90,7 +104,7 @@ if (session?.value === "authenticated") {
         const response = await fetch("/api/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password }),
+          body: JSON.stringify({ username, password }),
         });
 
         const data = await response.json();
