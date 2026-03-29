@@ -222,9 +222,9 @@
           </div>
           <div class="hidden sm:block">
             <h1 class="font-bold text-slate-900 dark:text-white leading-tight">Panel {config.name}</h1>
-            <button onclick={logout} class="text-[10px] text-slate-500 hover:text-rose-500/80 font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
-              Cerrar Sesión 
-            </button>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+              {role === 'super' ? 'Súper Admin' : 'Administrador'}
+            </p>
           </div>
         </div>
 
@@ -269,9 +269,9 @@
           {/if}
         </nav>
 
-        <!-- Global Action (Solo para Admins de tienda) -->
-        {#if role !== 'super'}
-          <div class="flex items-center gap-2">
+        <!-- Actions & Logout -->
+        <div class="flex items-center gap-2">
+          {#if role !== 'super'}
             <button 
               onclick={saveData}
               disabled={isSaving}
@@ -286,8 +286,16 @@
               {/if}
               <span class="hidden md:inline">{isSaving ? 'Guardando...' : 'Guardar'}</span>
             </button>
-          </div>
-        {/if}
+          {/if}
+          
+          <button 
+            onclick={logout} 
+            title="Cerrar Sesión"
+            class="w-11 h-11 rounded-2xl flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all active:scale-95"
+          >
+            <LogOut size={20} />
+          </button>
+        </div>
       </div>
 
       <!-- Feedback Toast (Floating) -->
