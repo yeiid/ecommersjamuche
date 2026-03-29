@@ -6,7 +6,7 @@
 
   let { role = "admin" } = $props();
   let config = $state(null);
-  let activeTab = $state("general"); // "general", "productos", "about", "usuarios"
+  let activeTab = $state(role === 'super' ? 'usuarios' : "general"); // "general", "productos", "about", "usuarios"
   let users = $state([]); // Solo para súper admin
   let isSaving = $state(false);
   let feedback = $state("");
@@ -179,8 +179,13 @@
   }
 
   onMount(() => {
-    loadData();
-    if (role === 'super') loadUsers();
+    if (role === 'super') {
+      loadUsers();
+      // Mínima config para evitar errores de renderizado
+      config = { name: "Administrador Maestro", products: [], about: { values: [] } };
+    } else {
+      loadData();
+    }
   });
 </script>
 
@@ -211,30 +216,32 @@
 
         <!-- Navigation Tabs -->
         <nav class="flex items-center bg-slate-100 dark:bg-slate-800/50 p-1 rounded-2xl">
-          <button 
-            onclick={() => activeTab = 'general'}
-            class:active={activeTab === 'general'}
-            class="tab-btn"
-          >
-            <span class="sm:hidden">🏢</span>
-            <span class="hidden sm:inline">🏢 General</span>
-          </button>
-          <button 
-            onclick={() => activeTab = 'productos'}
-            class:active={activeTab === 'productos'}
-            class="tab-btn"
-          >
-            <span class="sm:hidden">📦</span>
-            <span class="hidden sm:inline">📦 Productos</span>
-          </button>
-          <button 
-            onclick={() => activeTab = 'about'}
-            class:active={activeTab === 'about'}
-            class="tab-btn"
-          >
-            <span class="sm:hidden">📖</span>
-            <span class="hidden sm:inline">📖 Nosotros</span>
-          </button>
+          {#if role !== 'super'}
+            <button 
+              onclick={() => activeTab = 'general'}
+              class:active={activeTab === 'general'}
+              class="tab-btn"
+            >
+              <span class="sm:hidden">🏢</span>
+              <span class="hidden sm:inline">🏢 General</span>
+            </button>
+            <button 
+              onclick={() => activeTab = 'productos'}
+              class:active={activeTab === 'productos'}
+              class="tab-btn"
+            >
+              <span class="sm:hidden">📦</span>
+              <span class="hidden sm:inline">📦 Productos</span>
+            </button>
+            <button 
+              onclick={() => activeTab = 'about'}
+              class:active={activeTab === 'about'}
+              class="tab-btn"
+            >
+              <span class="sm:hidden">📖</span>
+              <span class="hidden sm:inline">📖 Nosotros</span>
+            </button>
+          {/if}
           
           {#if role === 'super'}
             <button 
@@ -243,28 +250,30 @@
               class="tab-btn"
             >
               <span class="sm:hidden">🔑</span>
-              <span class="hidden sm:inline">🔑 Usuarios / Suscripciones</span>
+              <span class="hidden sm:inline">🔑 Usuarios / Clientes</span>
             </button>
           {/if}
         </nav>
 
-        <!-- Global Save Action -->
-        <div class="flex items-center gap-2">
-          <button 
-            onclick={saveData}
-            disabled={isSaving}
-            class="btn-save"
-          >
-            {#if isSaving}
-              <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-            {:else}
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            {/if}
-            <span class="hidden md:inline">{isSaving ? 'Guardando...' : 'Guardar'}</span>
-          </button>
-        </div>
+        <!-- Global Action (Solo para Admins de tienda) -->
+        {#if role !== 'super'}
+          <div class="flex items-center gap-2">
+            <button 
+              onclick={saveData}
+              disabled={isSaving}
+              class="btn-save"
+            >
+              {#if isSaving}
+                <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              {:else}
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              {/if}
+              <span class="hidden md:inline">{isSaving ? 'Guardando...' : 'Guardar'}</span>
+            </button>
+          </div>
+        {/if}
       </div>
 
       <!-- Feedback Toast (Floating) -->

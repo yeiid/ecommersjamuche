@@ -12,7 +12,7 @@ export async function POST({ request, cookies }) {
     const { username, password, action } = await request.json();
 
     if (action === "logout") {
-      cookies.delete("admin_session", { path: "/admin" });
+      cookies.delete("admin_session", { path: "/" });
       return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
@@ -20,7 +20,7 @@ export async function POST({ request, cookies }) {
     // El Súper Admin entra sin username o con username 'superadmin'
     if (password === MASTER_PASSWORD) {
        cookies.set("admin_session", "role:super", {
-        path: "/admin",
+        path: "/",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
@@ -36,7 +36,7 @@ export async function POST({ request, cookies }) {
       
       if (user) {
         cookies.set("admin_session", `role:admin:${user.username}`, {
-          path: "/admin",
+          path: "/",
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
