@@ -13,8 +13,12 @@ export async function POST({ request, cookies }) {
 
     if (action === "logout") {
       cookies.delete("admin_session", { path: "/" });
+      cookies.delete("admin_session", { path: "/admin" }); // Limpiar rastro viejo si existe
       return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
+
+    // Limpiar cookie vieja de /admin antes de crear la nueva en /
+    cookies.delete("admin_session", { path: "/admin" });
 
     // 1. Verificar si es el Súper Admin (Usando Contraseña Maestra de Env)
     // El Súper Admin entra sin username o con username 'superadmin'
@@ -23,7 +27,7 @@ export async function POST({ request, cookies }) {
         path: "/",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: 60 * 60 * 24, // 24 horas
       });
       return new Response(JSON.stringify({ success: true, role: "super" }), { status: 200 });
@@ -39,7 +43,7 @@ export async function POST({ request, cookies }) {
           path: "/",
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          sameSite: "lax",
           maxAge: 60 * 60 * 24,
         });
         return new Response(JSON.stringify({ success: true, role: "admin" }), { status: 200 });

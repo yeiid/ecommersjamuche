@@ -5,6 +5,8 @@ import { getUsers, saveUsers } from "../../config/user.config";
  */
 export async function GET({ cookies }) {
   const session = cookies.get("admin_session");
+  console.log("[AUTH-DEBUG] GET /api/users.json | Session:", session?.value || "MISSING");
+  
   if (!session || session.value !== "role:super") {
     return new Response(JSON.stringify({ error: "No autorizado" }), { status: 403 });
   }
@@ -15,6 +17,8 @@ export async function GET({ cookies }) {
 
 export async function POST({ request, cookies }) {
   const session = cookies.get("admin_session");
+  console.log("[AUTH-DEBUG] POST /api/users.json | Session:", session?.value || "MISSING");
+  
   if (!session || session.value !== "role:super") {
     return new Response(JSON.stringify({ error: "No autorizado" }), { status: 403 });
   }
@@ -39,6 +43,8 @@ export async function POST({ request, cookies }) {
 
 export async function DELETE({ url, cookies }) {
   const session = cookies.get("admin_session");
+  console.log("[AUTH-DEBUG] DELETE /api/users.json | Session:", session?.value || "MISSING");
+
   if (!session || session.value !== "role:super") {
     return new Response(JSON.stringify({ error: "No autorizado" }), { status: 403 });
   }
