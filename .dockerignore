@@ -1,7 +1,13 @@
-node_modules
-dist
-.astro
-.vercel
-.git
+# env variables
 .env
-pnpm-lock.yaml
+.env.production
+.env.local
+
+# manual and extractions
+*.pdf
+extracted_content.txt
+
+# git/vscode
+.git
+.vscode
+.idea

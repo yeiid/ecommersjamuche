@@ -1,6 +1,6 @@
 <script>
   import { cartItems, cartCount, cartTotal, updateCartItemQuantity, removeItemCompletely, clearCart } from "../../stores/cartStore";
-  import { storeConfig, formatPrice, generateWhatsAppUrl } from "../../config/store.config";
+  import { formatPrice, generateWhatsAppUrl } from "../../config/store.config";
 
   let items = $state({});
   let count = $state(0);
@@ -63,7 +63,7 @@
           />
           <div class="flex-grow min-w-0">
             <h4 class="font-semibold text-slate-800 dark:text-white text-sm truncate">{item.name}</h4>
-            <p class="text-emerald-600 dark:text-emerald-400 font-bold text-sm mt-0.5">
+            <p class="text-yellow-600 dark:text-yellow-400 font-bold text-sm mt-0.5">
               {formatPrice(getItemPrice(item))}
             </p>
             <!-- Quantity Controls -->
@@ -102,11 +102,11 @@
       </div>
       <div class="flex justify-between text-sm text-slate-600 dark:text-slate-300">
         <span>Envío</span>
-        <span class="text-emerald-600 dark:text-emerald-400 font-medium">Coordinar por WhatsApp</span>
+        <span class="text-yellow-600 dark:text-yellow-400 font-medium">Coordinar por WhatsApp</span>
       </div>
       <div class="border-t border-slate-200 dark:border-slate-700 pt-4 flex justify-between">
         <span class="text-lg font-bold text-slate-900 dark:text-white">Total</span>
-        <span class="text-lg font-bold text-emerald-700 dark:text-emerald-400">{formatPrice(total)}</span>
+        <span class="text-lg font-bold text-yellow-700 dark:text-yellow-400">{formatPrice(total)}</span>
       </div>
     </div>
 

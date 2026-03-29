@@ -76,7 +76,12 @@ export function getStoreConfig(): StoreConfig {
     }
   }
   
-  // Fallback o objeto vacío para el cliente (el cliente debería recibir los datos vía props o fetch)
+  // Si estamos en el cliente, intentar obtener la configuración inyectada globalmente
+  if (typeof window !== "undefined" && (window as any).__STORE_CONFIG__) {
+    return (window as any).__STORE_CONFIG__;
+  }
+  
+  // Fallback o objeto vacío para el cliente
   return {} as any;
 }
 
@@ -103,44 +108,60 @@ export const storeConfig = getStoreConfig();
  */
 export function formatPrice(price: number): string {
   const config = getStoreConfig();
-  return new Intl.NumberFormat(config.currency.locale, {
-    style: "currency",
-    currency: config.currency.code,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
+  
+  // Fallback para el cliente si la configuración aún no está lista
+  const locale = config?.currency?.locale || "es-CO";
+  const currencyCode = config?.currency?.code || "COP";
+
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  } catch (e) {
+    // Ultimo recurso si Intl falla
+    return `$${price.toLocaleString()}`;
+  }
 }
 
 /**
- * Generar URL de WhatsApp con mensaje pre-formateado
+ * Generar URL de WhatsApp con mensaje pre-formateado (Formato optimizado y elegante)
  */
 export function generateWhatsAppUrl(
   items: Array<{ name: string; price: number; quantity: number }>,
   customerName?: string
 ): string {
   const config = getStoreConfig();
-  const { whatsappNumber, name, currency } = config;
+  const whatsappNumber = config?.whatsappNumber || "573153043323";
+  const storeName = config?.name || "Carlenis";
 
-  let message = `${config.whatsappGreeting}\n\n`;
-  message += `📋 *Pedido desde ${name}*\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━\n`;
+  let message = `🚀 *¡NUEVO PEDIDO EN ${storeName.toUpperCase()}!* 🚀\n`;
+  message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
+  if (customerName) {
+    message += `👤 *Cliente:* ${customerName}\n`;
+  }
+  message += `📅 *Fecha:* ${new Date().toLocaleDateString()}\n\n`;
+
+  message += `🛒 *RESUMEN DE COMPRA:*\n`;
+  
   let total = 0;
   items.forEach((item) => {
     const subtotal = item.price * item.quantity;
     total += subtotal;
-    message += `▪️ *${item.quantity}x* ${item.name}\n`;
-    message += `   ${currency.symbol}${subtotal.toLocaleString(currency.locale)}\n`;
+    message += `\n✅ *${item.quantity}x* ${item.name}\n`;
+    message += `   └─ Subtotal: ${formatPrice(subtotal)}\n`;
   });
 
-  message += `━━━━━━━━━━━━━━━━━━━━\n`;
-  message += `💰 *Total: ${currency.symbol}${total.toLocaleString(currency.locale)}*\n\n`;
+  message += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
+  message += `💰 *TOTAL A PAGAR: ${formatPrice(total)}*\n`;
+  message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
-  if (customerName) {
-    message += `👤 *Nombre:* ${customerName}\n`;
-  }
-
-  message += `\nQuedo atento(a) para coordinar el pago y envío. ¡Gracias! 🙏`;
+  message += `✨ *Próximos pasos:*\n`;
+  message += `Por favor, envíame tu dirección para coordinar el envío y los métodos de pago disponibles. 🚚\n\n`;
+  message += `¡Muchas gracias por elegirnos! 🙏`;
 
   return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 }

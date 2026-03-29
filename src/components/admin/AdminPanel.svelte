@@ -122,7 +122,7 @@
 {#if !config}
   <div class="flex items-center justify-center min-h-[60vh]">
     <div class="text-center space-y-4 animate-pulse">
-      <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <div class="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
       <p class="text-slate-500 font-medium">Cargando base de datos...</p>
     </div>
   </div>
@@ -133,7 +133,7 @@
       <div class="glass border border-white/10 dark:border-slate-800/50 shadow-2xl rounded-[2rem] p-2 pr-4 flex items-center justify-between gap-4 backdrop-blur-xl">
         <!-- Logo & Brand -->
         <div class="flex items-center gap-3 pl-2">
-          <div class="w-11 h-11 bg-emerald-700 rounded-2xl flex items-center justify-center shadow-inner text-white font-bold text-lg">
+          <div class="w-11 h-11 bg-yellow-400 rounded-2xl flex items-center justify-center shadow-inner text-black font-bold text-lg">
             {config.name?.charAt(0).toUpperCase()}
           </div>
           <div class="hidden sm:block">
@@ -211,7 +211,7 @@
         <div transition:fade class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <section class="glass-card p-8 space-y-6">
             <h2 class="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-white mb-6">
-              <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-sm">🏢</span>
+              <span class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-sm">🏢</span>
                 Información Básica
             </h2>
             <div class="space-y-4">
@@ -232,7 +232,7 @@
 
           <section class="glass-card p-8 space-y-6">
             <h2 class="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-white mb-6">
-              <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-sm">📲</span>
+              <span class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-sm">📲</span>
                 Canales de Venta
             </h2>
             <div class="space-y-4">
@@ -253,6 +253,47 @@
               <div class="group">
                 <label for="email" class="label text-slate-500 dark:text-slate-400">E-mail de contacto</label>
                 <input id="email" type="email" bind:value={config.contact.email} class="admin-input" />
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- 📍 LOCATION & SOCIAL -->
+        <div transition:fade class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+          <section class="glass-card p-8 space-y-6">
+            <h2 class="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-white mb-6">
+              <span class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-sm">📍</span>
+                Ubicación Física
+            </h2>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="group">
+                <label for="city" class="label text-slate-500 dark:text-slate-400">Ciudad</label>
+                <input id="city" type="text" bind:value={config.contact.city} class="admin-input" />
+              </div>
+              <div class="group">
+                <label for="country" class="label text-slate-500 dark:text-slate-400">País</label>
+                <input id="country" type="text" bind:value={config.contact.country} class="admin-input" />
+              </div>
+            </div>
+          </section>
+
+          <section class="glass-card p-8 space-y-6">
+            <h2 class="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-white mb-6">
+              <span class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-sm">🌐</span>
+                Presencia en Redes
+            </h2>
+            <div class="space-y-4">
+              <div class="group">
+                <label for="ig" class="label text-slate-500 dark:text-slate-400">Instagram (URL)</label>
+                <input id="ig" type="url" bind:value={config.social.instagram} class="admin-input text-xs" placeholder="https://instagram.com/tu_cuenta" />
+              </div>
+              <div class="group">
+                <label for="fb" class="label text-slate-500 dark:text-slate-400">Facebook (URL)</label>
+                <input id="fb" type="url" bind:value={config.social.facebook} class="admin-input text-xs" placeholder="https://facebook.com/tu_cuenta" />
+              </div>
+              <div class="group">
+                <label for="tk" class="label text-slate-500 dark:text-slate-400">TikTok (URL)</label>
+                <input id="tk" type="url" bind:value={config.social.tiktok} class="admin-input text-xs" placeholder="https://tiktok.com/@tu_cuenta" />
               </div>
             </div>
           </section>
@@ -307,10 +348,6 @@
                         <label class="label text-slate-400">Descripción detallada</label>
                         <textarea bind:value={product.description} class="admin-input h-28 text-sm pt-2"></textarea>
                       </div>
-                      <div>
-                        <label class="label text-slate-400">URL de la Imagen</label>
-                        <input type="text" bind:value={product.image} class="admin-input !text-[11px] font-mono" />
-                      </div>
                     </div>
 
                     <!-- Col 2: Specs & Pricing -->
@@ -318,7 +355,7 @@
                       <div class="grid grid-cols-2 gap-3">
                         <div>
                           <label class="label text-slate-400">Precio Base</label>
-                          <input type="number" bind:value={product.price} class="admin-input text-emerald-600 dark:text-emerald-400 font-bold" />
+                          <input type="number" bind:value={product.price} class="admin-input text-yellow-600 dark:text-yellow-400 font-bold" />
                         </div>
                         <div>
                           <label class="label text-slate-400">Oferta (opcional)</label>
@@ -356,7 +393,7 @@
         <div transition:fade class="grid grid-cols-1 gap-8">
            <section class="glass-card p-8">
             <h2 class="text-xl font-bold flex items-center gap-2 mb-8">
-              <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-sm text-emerald-600">📖</span>
+              <span class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-sm text-yellow-600">📖</span>
               Historia y Misión
             </h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -374,7 +411,7 @@
            <section class="glass-card p-8">
             <div class="flex justify-between items-center mb-8">
               <h2 class="text-xl font-bold flex items-center gap-2">
-                <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-sm text-emerald-600">💎</span>
+                <span class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-sm text-yellow-600">💎</span>
                 Nuestros Valores
               </h2>
               <button onclick={addValue} class="btn-primary-compact">Añadir Valor +</button>
@@ -421,7 +458,7 @@
   .admin-input {
     @apply w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80 rounded-xl px-4 py-2.5;
     @apply text-slate-800 dark:text-slate-100 placeholder-slate-400;
-    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all duration-300;
+    @apply focus:outline-none focus:ring-2 focus:ring-yellow-500/30 focus:border-yellow-500 transition-all duration-300;
   }
 
   .label {
@@ -433,19 +470,19 @@
     @apply px-4 sm:px-6 py-2 rounded-xl text-sm font-bold transition-all duration-300 text-slate-500;
   }
   .tab-btn.active {
-    @apply bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 shadow-md;
+    @apply bg-white dark:bg-black text-yellow-600 dark:text-yellow-400 shadow-md;
   }
 
   /* Buttons */
   .btn-save {
-    @apply bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all;
+    @apply bg-yellow-500 hover:bg-yellow-400 text-black px-5 py-2.5 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-yellow-500/20 active:scale-95 transition-all;
   }
   .btn-save:disabled {
     @apply bg-slate-400 opacity-50 cursor-not-allowed;
   }
 
   .btn-primary-compact {
-    @apply bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white text-xs font-bold px-6 py-3 rounded-2xl transition-all shadow-lg;
+    @apply bg-black dark:bg-yellow-500 hover:bg-slate-900 dark:hover:bg-yellow-400 text-white dark:text-black text-xs font-bold px-6 py-3 rounded-2xl transition-all shadow-lg;
   }
 
   .btn-danger {
@@ -461,7 +498,7 @@
     @apply flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-slate-900/30 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-emerald-500/30 transition-all;
   }
   .toggle-container input {
-    @apply w-4 h-4 accent-emerald-600;
+    @apply w-4 h-4 accent-yellow-600;
   }
   .toggle-label {
     @apply text-xs font-medium text-slate-600 dark:text-slate-300;
@@ -469,7 +506,7 @@
 
   /* Feedback */
   .feedback-toast {
-    @apply bg-emerald-600 text-white border-emerald-500;
+    @apply bg-yellow-500 text-black border-yellow-400;
   }
   .feedback-toast.error {
     @apply bg-rose-600 text-white border-rose-500;

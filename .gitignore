@@ -13,12 +13,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# environment variables
-.env
-.env.production
-
-# macOS-specific files
-.DS_Store
-
 # jetbrains setting folder
 .idea/
+
+# manuals and extractions (Portafolio PDF)
+*.pdf
+extracted_content.txt

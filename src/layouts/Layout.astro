@@ -67,6 +67,14 @@ const pageDescription = description || storeConfig.description;
         }
       });
     </script>
+
+    <!-- Client-side Global Store Config -->
+    <script define:vars={{ storeConfig }}>
+      window.__STORE_CONFIG__ = storeConfig;
+      document.addEventListener('astro:after-swap', () => {
+        window.__STORE_CONFIG__ = storeConfig;
+      });
+    </script>
   </head>
   <body class="min-h-screen flex flex-col bg-surface-50 dark:bg-surface-900 text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <Header />

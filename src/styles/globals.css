@@ -6,22 +6,22 @@
 
 @layer base {
   :root {
-    --color-primary: #2d6a4f;
-    --color-secondary: #b7791f;
-    --color-accent: #d4a373;
-    --color-bg: #fefaf6;
-    --color-surface: #ffffff;
-    --color-text: #1a1a2e;
-    --color-text-muted: #6b7280;
-    --color-border: #e5e7eb;
+    --color-primary: #facc15; /* Yellow-400 */
+    --color-secondary: #000000; /* Black */
+    --color-accent: #fbbf24; /* Amber-400 */
+    --color-bg: #ffffff;
+    --color-surface: #f8fafc;
+    --color-text: #0f172a;
+    --color-text-muted: #64748b;
+    --color-border: #e2e8f0;
   }
 
   .dark {
-    --color-bg: #020617; /* Deepest Slate (950) */
-    --color-surface: #0f172a; /* Muted Slate (900) */
-    --color-text: #cbd5e1; /* Soft Gray-Blue Text (300) */
-    --color-text-muted: #64748b; /* Muted Slate (500) */
-    --color-border: #1e293b; /* Subtle Border (800) */
+    --color-bg: #000000; /* Pure Black */
+    --color-surface: #0f171b; /* Very Dark Slate */
+    --color-text: #f1f5f9; /* Near White */
+    --color-text-muted: #94a3b8; /* Muted Slate */
+    --color-border: #1e293b; /* Subtle Slate Border */
   }
 
   html {
@@ -50,7 +50,7 @@
   }
 
   .glass-card {
-    @apply glass rounded-2xl shadow-lg;
+    @apply glass rounded-2xl shadow-lg border border-slate-200/50 dark:border-white/5;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -67,14 +67,14 @@
   }
 
   .btn-primary {
-    @apply bg-emerald-700 text-white hover:bg-emerald-800 shadow-lg hover:shadow-emerald-500/25;
-    @apply focus-visible:ring-emerald-500;
+    @apply bg-yellow-400 text-black hover:bg-yellow-500 shadow-lg hover:shadow-yellow-500/25;
+    @apply focus-visible:ring-yellow-500;
   }
 
   .btn-secondary {
-    @apply bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700;
-    @apply hover:border-emerald-500 text-slate-800 dark:text-slate-100;
-    @apply focus-visible:ring-slate-400;
+    @apply bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800;
+    @apply hover:border-yellow-400 text-slate-800 dark:text-slate-100;
+    @apply focus-visible:ring-yellow-400;
   }
 
   .btn-whatsapp {
@@ -110,7 +110,7 @@
     @apply rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3;
     @apply bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100;
     @apply placeholder-slate-400 dark:placeholder-slate-500;
-    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent;
+    @apply focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent;
     @apply transition-all duration-200;
   }
 
@@ -120,7 +120,7 @@
   }
 
   .badge-new {
-    @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300;
+    @apply bg-amber-100 text-amber-900 dark:bg-yellow-500/20 dark:text-yellow-400;
   }
 
   .badge-sale {
@@ -235,9 +235,9 @@
 
 /* ═══ Hero Gradient ═══ */
 .hero-gradient {
-  background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 40%, #0f2922 100%);
+  background: linear-gradient(135deg, #000000 0%, #111111 40%, #1a1a1a 100%);
 }
 
 .hero-gradient-overlay {
-  background: radial-gradient(ellipse at 70% 50%, rgba(212, 163, 115, 0.15) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 70% 50%, rgba(250, 204, 21, 0.1) 0%, transparent 70%);
 }

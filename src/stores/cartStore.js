@@ -113,7 +113,8 @@ function updateTotals() {
   let total = 0;
 
   Object.values(items).forEach((item) => {
-    if (item) {
+    // Validamos que el producto tenga un ID y una cantidad válida
+    if (item && typeof item === 'object' && item.id && item.quantity > 0) {
       count += item.quantity;
       total += getItemPrice(item) * item.quantity;
     }
@@ -153,10 +154,14 @@ export function initCart() {
 
   const saved = load();
   if (saved && typeof saved === "object") {
-    cartItems.set({});
+    const cleanItems = {};
     Object.entries(saved).forEach(([key, item]) => {
-      if (item) cartItems.setKey(key, item);
+      // Solo restaurar si el item es válido y tiene contenido
+      if (item && typeof item === 'object' && item.id) {
+        cleanItems[key] = item;
+      }
     });
+    cartItems.set(cleanItems);
     updateTotals();
   }
 
@@ -165,7 +170,7 @@ export function initCart() {
   });
 }
 
-// Auto-init on client
+// Auto-init on client (faster hydration)
 if (typeof window !== "undefined") {
-  setTimeout(() => initCart(), 50);
+  initCart();
 }
