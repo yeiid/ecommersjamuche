@@ -180,12 +180,16 @@
   async function deleteUser(id) {
     if (!confirm("¿Eliminar usuario?")) return;
     try {
-      const response = await fetch(`/api/users.json?id=${id}`, {
-        method: "DELETE"
+      const response = await fetch("/api/users.json", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", id })
       });
       if (response.ok) {
         users = users.filter((u) => u.id !== id);
         showFeedback("Usuario eliminado");
+      } else {
+        showFeedback("Error al eliminar", "error");
       }
     } catch (e) {
       showFeedback("Error");

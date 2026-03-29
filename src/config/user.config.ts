@@ -13,12 +13,26 @@ export interface User {
 }
 
 /**
+ * Asegurar que la carpeta 'data/' exista y el archivo users.json esté inicializado
+ */
+function ensureDataDir() {
+  const dirPath = path.resolve(process.cwd(), "data");
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+}
+
+/**
  * Obtener todos los usuarios
  */
 export function getUsers(): User[] {
   try {
+    ensureDataDir();
     const filePath = path.resolve(process.cwd(), "data/users.json");
-    if (!fs.existsSync(filePath)) return [];
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, "[]", "utf-8");
+      return [];
+    }
     const fileContent = fs.readFileSync(filePath, "utf-8");
     return JSON.parse(fileContent);
   } catch (error) {
@@ -32,6 +46,7 @@ export function getUsers(): User[] {
  */
 export function saveUsers(users: User[]): boolean {
   try {
+    ensureDataDir();
     const filePath = path.resolve(process.cwd(), "data/users.json");
     fs.writeFileSync(filePath, JSON.stringify(users, null, 2), "utf-8");
     return true;

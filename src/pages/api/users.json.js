@@ -24,40 +24,31 @@ export async function POST({ request, cookies }) {
   }
 
   try {
-    const newUser = await request.json();
+    const data = await request.json();
+    const { action, id, ...newUser } = data;
     const users = getUsers();
-    
+
+    // Acción: ELIMINAR
+    if (action === "delete") {
+      const filtered = users.filter(u => u.id !== id);
+      if (saveUsers(filtered)) {
+        return new Response(JSON.stringify({ success: true }), { status: 200 });
+      }
+      return new Response(null, { status: 500 });
+    }
+
+    // Acción: CREAR (Por defecto)
     // Evitar duplicados
     if (users.find(u => u.username === newUser.username)) {
       return new Response(JSON.stringify({ error: "El usuario ya existe" }), { status: 400 });
     }
 
-    users.push(newUser);
+    users.push({ ...newUser, id: newUser.id || Date.now().toString() });
     saveUsers(users);
     
     return new Response(JSON.stringify({ success: true }), { status: 201 });
   } catch (error) {
+    console.error("Error en API users:", error);
     return new Response(JSON.stringify({ error: "Error procesando solicitud" }), { status: 500 });
   }
-}
-
-export async function DELETE({ url, cookies }) {
-  const session = cookies.get("admin_session");
-  console.log("[AUTH-DEBUG] DELETE /api/users.json | Session:", session?.value || "MISSING");
-
-  if (!session || session.value !== "role:super") {
-    return new Response(JSON.stringify({ error: "No autorizado" }), { status: 403 });
-  }
-
-  const id = url.searchParams.get("id");
-  if (!id) return new Response(null, { status: 400 });
-
-  const users = getUsers();
-  const filtered = users.filter(u => u.id !== id);
-  
-  if (saveUsers(filtered)) {
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
-  }
-  
-  return new Response(null, { status: 500 });
 }
