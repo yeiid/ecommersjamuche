@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:22-alpine AS build
+FROM node:22-slim AS build
 WORKDIR /app
 
 # Instalar pnpm
@@ -18,7 +18,7 @@ COPY . .
 RUN pnpm run build
 
 # Stage 2: Runtime
-FROM node:22-alpine AS runtime
+FROM node:22-slim AS runtime
 WORKDIR /app
 
 # Definir variables de entorno
