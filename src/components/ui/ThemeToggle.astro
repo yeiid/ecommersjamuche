@@ -4,7 +4,7 @@
 
 <button
   id="theme-toggle"
-  class="fixed bottom-6 right-6 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 dark:text-white z-40"
+  class="fixed bottom-24 right-6 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-gray-800 dark:text-white z-40"
   aria-label="Cambiar tema"
 >
   <div class="relative w-6 h-6 flex items-center justify-center">
@@ -51,19 +51,27 @@
 </button>
 
 <script>
-  // Lógica para cambiar entre temas
-  const themeToggle = document.getElementById("theme-toggle");
+  function setupThemeToggle() {
+    const themeToggle = document.getElementById("theme-toggle");
 
-  if (themeToggle) {
-    themeToggle.addEventListener("click", () => {
-      // Toggle dark class en documentElement
-      document.documentElement.classList.toggle("dark");
-
-      // Actualizar localStorage
-      const isDark = document.documentElement.classList.contains("dark");
-      localStorage.setItem("theme", isDark ? "dark" : "light");
-    });
+    if (themeToggle) {
+      // Remove any existing listener before adding a new one (important for transitions)
+      themeToggle.removeEventListener("click", toggleTheme);
+      themeToggle.addEventListener("click", toggleTheme);
+    }
   }
+
+  function toggleTheme() {
+    document.documentElement.classList.toggle("dark");
+    const isDark = document.documentElement.classList.contains("dark");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  }
+
+  // Initial setup
+  setupThemeToggle();
+
+  // Re-run setup after view transitions
+  document.addEventListener("astro:page-load", setupThemeToggle);
 </script>
 
 <style>

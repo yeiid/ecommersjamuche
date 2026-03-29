@@ -1,0 +1,277 @@
+{
+  "name": "Carlenis",
+  "tagline": "Tu bienestar, nuestra pasión",
+  "description": "Distribuidor Independiente FuXion®. Bebidas efervescentes 100% naturales, libres de azúcar, diseñadas para transformar tu salud desde adentro.",
+  "whatsappNumber": "573001234567",
+  "whatsappGreeting": "¡Hola Carlenis! Me gustaría hacer un pedido de productos FuXion 🌿",
+  "siteUrl": "https://vidaglow.com",
+  "currency": {
+    "code": "COP",
+    "symbol": "$",
+    "locale": "es-CO"
+  },
+  "social": {
+    "instagram": "https://instagram.com/fuxion_bienestar",
+    "facebook": "https://facebook.com/fuxion_bienestar",
+    "tiktok": "https://tiktok.com/@fuxion_bienestar"
+  },
+  "contact": {
+    "email": "hola@fuxionbienestar.com",
+    "phone": "+57 300 123 4567",
+    "city": "Bogotá",
+    "country": "Colombia"
+  },
+  "categories": [
+    "Limpieza y Detox",
+    "Regeneración Celular",
+    "Energía y Vitaminas",
+    "Sistema Inmunológico",
+    "Control de Peso",
+    "Antiedad y Belleza",
+    "Vigor Mental",
+    "Línea Sport",
+    "Línea Gastronómica"
+  ],
+  "about": {
+    "heroTitle": "Nuestra Filosofía FuXion",
+    "heroSubtitle": "Creemos en la Salud Plena: salud física, emocional y financiera.",
+    "historyTitle": "🌿 Quiénes somos",
+    "historyContent": "Soy {name}, tu asesor FuXion. Nuestra misión es llevar bienestar a cada hogar a través de la Biotecnología, fusionando los conocimientos ancestrales de la Amazonía con la tecnología moderna para crear bebidas que realmente transforman vidas.",
+    "missionTitle": "💚 Nuestra misión",
+    "missionContent": "Ofrecerte soluciones naturales para limpiar, regenerar y revitalizar tu cuerpo de manera efectiva. Somos el reemplazo saludable de las bebidas azucaradas del mercado.",
+    "valuesTitle": "✨ Nuestros valores",
+    "values": [
+      {
+        "icon": "🌱",
+        "title": "Naturalidad",
+        "description": "Ingredientes 100% orgánicos y libres de azúcar"
+      },
+      {
+        "icon": "⚡",
+        "title": "Energía",
+        "description": "Vitalidad para tu día a día"
+      },
+      {
+        "icon": "🛡️",
+        "title": "Protección",
+        "description": "Refuerza tus defensas naturalmente"
+      },
+      {
+        "icon": "💚",
+        "title": "Salud Plena",
+        "description": "Bienestar en todos los niveles"
+      }
+    ]
+  },
+  "products": [
+    {
+      "id": "fux-01",
+      "name": "PRUNEX 1",
+      "description": "Limpia el colon y combate el estreñimiento de manera natural. Combinación herbal con efecto laxante suave y depurativo.",
+      "price": 138100,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Limpieza y Detox",
+      "featured": true,
+      "isNew": false,
+      "benefits": ["Desintoxica el colon", "Remueve materia fecal acumulada", "Promueve la regularidad"]
+    },
+    {
+      "id": "fux-02",
+      "name": "FLORA LIV",
+      "description": "Regenera y equilibra la flora intestinal con 10 mil millones de probióticos por toma. Protege tu organismo desde adentro.",
+      "price": 165700,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Limpieza y Detox",
+      "featured": false,
+      "benefits": ["Regenera flora intestinal", "Reduce acidez y gastritis", "Refuerza inmunidad"]
+    },
+    {
+      "id": "fux-03",
+      "name": "ALPHA BALANCE",
+      "description": "Bebida alcalinizante que ayuda a equilibrar el pH de tu cuerpo y eliminar elementos tóxicos del organismo.",
+      "price": 138100,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Limpieza y Detox",
+      "featured": false,
+      "benefits": ["Equilibra el pH", "Depura toxinas y metales pesados", "Fortalece sistema inmune"]
+    },
+    {
+      "id": "fux-04",
+      "name": "BIOPRO+TECT",
+      "description": "Nutrición y protección inmunológica del más alto nivel con proteína de calostro bovino patentada.",
+      "price": 130500,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Regeneración Celular",
+      "featured": true,
+      "isNew": false,
+      "benefits": ["Resistencia a enfermedades", "Potencia defensas", "Recuperación muscular"]
+    },
+    {
+      "id": "fux-05",
+      "name": "VITA XTRA T+",
+      "description": "Energía natural prolongada que ayuda a mantenerte alerta y de buen ánimo durante todo el día.",
+      "price": 138100,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Energía y Vitaminas",
+      "featured": true,
+      "isNew": false,
+      "benefits": ["Disipa la fatiga", "Rendimiento físico", "Antioxidante potente"]
+    },
+    {
+      "id": "fux-06",
+      "name": "NUTRADAY",
+      "description": "Complemento nutricional con Moringa y vitaminas esenciales para niños y adultos. Vitalidad diaria.",
+      "price": 138100,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Energía y Vitaminas",
+      "featured": false,
+      "benefits": ["Mayor vitalidad", "Fortalece defensas", "Aporta Hierro y Calcio"]
+    },
+    {
+      "id": "fux-07",
+      "name": "VERA+",
+      "description": "Fortalece, despierta y modula tu sistema inmunológico. Ideal para combatir alergias y virus respiratorios.",
+      "price": 179400,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Sistema Inmunológico",
+      "featured": true,
+      "isNew": true,
+      "benefits": ["Adiós alergias y virus", "Protege vías respiratorias", "Modula el sistema inmune"]
+    },
+    {
+      "id": "fux-08",
+      "name": "THERMO T3",
+      "description": "Transforma el exceso de grasa en energía con una deliciosa combinación de té verde, té negro y té rojo.",
+      "price": 138100,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Control de Peso",
+      "featured": true,
+      "isNew": false,
+      "benefits": ["Quema grasa localizada", "Acelera metabolismo", "Reduce colesterol"]
+    },
+    {
+      "id": "fux-09",
+      "name": "NO CARB-T",
+      "description": "Pon los carbohidratos a raya inhibiendo parcialmente su asimilación. Control de peso saludable.",
+      "price": 138100,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Control de Peso",
+      "featured": false,
+      "benefits": ["Reduce glucosa en sangre", "Inhibe carbohidratos", "Control de medidas"]
+    },
+    {
+      "id": "fux-10",
+      "name": "COOL AGE",
+      "description": "Péptidos de colágeno bioactivo para una piel con mayor elasticidad, más firme y sin arrugas.",
+      "price": 172600,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Antiedad y Belleza",
+      "featured": true,
+      "isNew": true,
+      "benefits": ["Elasticidad y firmeza", "Nutrición celular", "Cabello y uñas fuertes"]
+    },
+    {
+      "id": "fux-11",
+      "name": "GOLDEN FLX",
+      "description": "Protege y nutre tus articulaciones con Cúrcuma, Jengibre y Cardamomo. Alivio natural.",
+      "price": 151900,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Antiedad y Belleza",
+      "featured": false,
+      "benefits": ["Movilidad articular", "Anti-inflamatorio natural", "Control oxidativo"]
+    },
+    {
+      "id": "fux-12",
+      "name": "ON",
+      "description": "Mente alerta y activa durante todo el día. Mejora la concentración, memoria y rendimiento intelectual.",
+      "price": 110400,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Vigor Mental",
+      "featured": true,
+      "isNew": false,
+      "benefits": ["Mejora memoria", "Concentración máxima", "Mente activa"]
+    },
+    {
+      "id": "fux-13",
+      "name": "OFF",
+      "description": "Mente sin estrés, relajada y enfocada. Equilibra el sistema nervioso sin producir somnolencia.",
+      "price": 151900,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Vigor Mental",
+      "featured": false,
+      "benefits": ["Mente sin estrés", "Relajación enfocada", "Calidad de sueño"]
+    },
+    {
+      "id": "fux-14",
+      "name": "PRE SPORT",
+      "description": "Bebida rehidratante y energética que mejora el desempeño físico para actividad deportiva intensa.",
+      "price": 151800,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Línea Sport",
+      "featured": true,
+      "isNew": false,
+      "benefits": ["Mejor desempeño", "Hidratación celular", "Previene lesiones"]
+    },
+    {
+      "id": "fux-15",
+      "name": "POST SPORT",
+      "description": "Recuperación muscular total después del ejercicio intenso con BCAA y agua de coco natural.",
+      "price": 151800,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Línea Sport",
+      "featured": false,
+      "benefits": ["Recuperación muscular", "Repone electrolitos", "Fortalece fibras"]
+    },
+    {
+      "id": "fux-16",
+      "name": "PROBIX",
+      "description": "Línea Gastronómica: Probióticos para tus comidas que ayudan a reducir la grasa visceral y el perímetro de la cintura.",
+      "price": 138100,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Línea Gastronómica",
+      "featured": true,
+      "isNew": true,
+      "benefits": ["Reduce grasa visceral", "Regula metabolismo", "Salud digestiva"]
+    },
+    {
+      "id": "fux-17",
+      "name": "REXET",
+      "description": "Protege y desintoxica tu hígado de manera natural. Ideal para casos de hígado graso y resacas.",
+      "price": 138100,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Limpieza y Detox",
+      "featured": false,
+      "benefits": ["Protección hepática", "Efecto depurador", "Confort digestivo"]
+    },
+    {
+      "id": "fux-18",
+      "name": "LIQUID FIBER",
+      "description": "Asegura el ritmo adecuado de evacuaciones. Mejora la asimilación del calcio y reduce absorción de grasas.",
+      "price": 110400,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Limpieza y Detox",
+      "featured": false,
+      "benefits": ["Depuración intestinal", "Fibra soluble", "Mejora digestión"]
+    },
+    {
+      "id": "fux-19",
+      "name": "BERRY BALANCE",
+      "description": "Protege el sistema urinario y mantiene el equilibrio del pH favoreciendo la eliminación de líquidos.",
+      "price": 179400,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Limpieza y Detox",
+      "featured": false,
+      "benefits": ["Salud urinaria", "Evita bacterias", "Elimina líquidos"]
+    },
+    {
+      "id": "fux-20",
+      "name": "HGH",
+      "description": "Nutre la glándula pituitaria y estimula la hormona de la juventud. Vitalidad y calidad de sueño.",
+      "price": 138100,
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "category": "Antiedad y Belleza",
+      "featured": false,
+      "benefits": ["Retarda envejecimiento", "Piel elástica", "Sueño profundo"]
+    }
+  ]
+}

@@ -1,0 +1,485 @@
+<script>
+  import { onMount } from "svelte";
+  import { fade, slide, scale } from "svelte/transition";
+  import { storeConfig } from "../../config/store.config"; // For types only
+
+  let config = $state(null);
+  let activeTab = $state("general"); // "general", "productos", "about"
+  let isSaving = $state(false);
+  let feedback = $state("");
+  let feedbackType = $state("success"); // "success" or "error"
+  let searchQuery = $state("");
+
+  // Temporary item for adding new product
+  const newProductTemplate = {
+    id: "",
+    name: "Nuevo Producto",
+    description: "Descripción del producto...",
+    price: 0,
+    discountPrice: 0,
+    image: "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400",
+    category: "",
+    featured: false,
+    isNew: true,
+    benefits: [],
+  };
+
+  /**
+   * Cargar datos desde la API
+   */
+  async function loadData() {
+    try {
+      const response = await fetch("/api/config.json");
+      if (response.ok) {
+        config = await response.json();
+      }
+    } catch (e) {
+      console.error("Error al cargar la configuración:", e);
+      showFeedback("Error al cargar los datos", "error");
+    }
+  }
+
+  /**
+   * Mostrar feedback temporal
+   */
+  function showFeedback(message, type = "success") {
+    feedback = message;
+    feedbackType = type;
+    setTimeout(() => (feedback = ""), 4000);
+  }
+
+  /**
+   * Guardar datos en el servidor
+   */
+  async function saveData() {
+    isSaving = true;
+    try {
+      const response = await fetch("/api/config.json", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+      });
+
+      if (response.ok) {
+        showFeedback("¡Cambios guardados correctamente!");
+      } else {
+        showFeedback("Error al guardar", "error");
+      }
+    } catch (e) {
+      showFeedback("Error de red", "error");
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  /**
+   * Filtrar productos según la búsqueda
+   */
+  const filteredProducts = $derived(() => {
+    if (!config?.products) return [];
+    if (!searchQuery) return config.products;
+    const q = searchQuery.toLowerCase();
+    return config.products.filter(p => 
+      p.name.toLowerCase().includes(q) || 
+      p.category.toLowerCase().includes(q)
+    );
+  });
+
+  function addProduct() {
+    const newP = { ...newProductTemplate, id: Date.now().toString() };
+    config.products = [newP, ...config.products];
+    activeTab = "productos";
+    searchQuery = ""; // Limpiar búsqueda para ver el nuevo
+    showFeedback("Producto añadido al inicio");
+  }
+
+  function removeProduct(id) {
+    if (confirm("¿Eliminar este producto permanentemente?")) {
+      config.products = config.products.filter((p) => p.id !== id);
+      showFeedback("Producto eliminado");
+    }
+  }
+
+  async function logout() {
+    const response = await fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "logout" }),
+    });
+    if (response.ok) window.location.href = "/admin/login";
+  }
+
+  function addValue() {
+    config.about.values = [
+      ...config.about.values,
+      { icon: "✨", title: "Nuevo Valor", description: "Descripción..." },
+    ];
+  }
+
+  onMount(loadData);
+</script>
+
+{#if !config}
+  <div class="flex items-center justify-center min-h-[60vh]">
+    <div class="text-center space-y-4 animate-pulse">
+      <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <p class="text-slate-500 font-medium">Cargando base de datos...</p>
+    </div>
+  </div>
+{:else}
+  <div class="space-y-8 pb-20">
+    <!-- ═══ STICKY CONTROL CENTER ═══ -->
+    <header class="sticky top-4 z-40">
+      <div class="glass border border-white/10 dark:border-slate-800/50 shadow-2xl rounded-[2rem] p-2 pr-4 flex items-center justify-between gap-4 backdrop-blur-xl">
+        <!-- Logo & Brand -->
+        <div class="flex items-center gap-3 pl-2">
+          <div class="w-11 h-11 bg-emerald-700 rounded-2xl flex items-center justify-center shadow-inner text-white font-bold text-lg">
+            {config.name?.charAt(0).toUpperCase()}
+          </div>
+          <div class="hidden sm:block">
+            <h1 class="font-bold text-slate-900 dark:text-white leading-tight">Panel {config.name}</h1>
+            <button onclick={logout} class="text-[10px] text-slate-500 hover:text-rose-500/80 font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
+              Cerrar Sesión 
+            </button>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex items-center bg-slate-100 dark:bg-slate-800/50 p-1 rounded-2xl">
+          <button 
+            onclick={() => activeTab = 'general'}
+            class:active={activeTab === 'general'}
+            class="tab-btn"
+          >
+            <span class="sm:hidden">🏢</span>
+            <span class="hidden sm:inline">🏢 General</span>
+          </button>
+          <button 
+            onclick={() => activeTab = 'productos'}
+            class:active={activeTab === 'productos'}
+            class="tab-btn"
+          >
+            <span class="sm:hidden">📦</span>
+            <span class="hidden sm:inline">📦 Productos</span>
+          </button>
+          <button 
+            onclick={() => activeTab = 'about'}
+            class:active={activeTab === 'about'}
+            class="tab-btn"
+          >
+            <span class="sm:hidden">📖</span>
+            <span class="hidden sm:inline">📖 Nosotros</span>
+          </button>
+        </nav>
+
+        <!-- Global Save Action -->
+        <div class="flex items-center gap-2">
+          <button 
+            onclick={saveData}
+            disabled={isSaving}
+            class="btn-save"
+          >
+            {#if isSaving}
+              <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            {:else}
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            {/if}
+            <span class="hidden md:inline">{isSaving ? 'Guardando...' : 'Guardar'}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feedback Toast (Floating) -->
+      {#if feedback}
+        <div 
+          transition:fade
+          class:error={feedbackType === 'error'}
+          class="absolute top-full left-1/2 -translate-x-1/2 mt-4 px-6 py-3 rounded-2xl text-sm font-bold shadow-xl border z-50 feedback-toast"
+        >
+          {feedback}
+        </div>
+      {/if}
+    </header>
+
+    <!-- ═══ SECTION CONTENT ═══ -->
+    <main class="max-w-6xl mx-auto px-2">
+      
+      {#if activeTab === 'general'}
+        <!-- 🏢 GENERAL SETTINGS -->
+        <div transition:fade class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <section class="glass-card p-8 space-y-6">
+            <h2 class="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-white mb-6">
+              <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-sm">🏢</span>
+                Información Básica
+            </h2>
+            <div class="space-y-4">
+              <div class="group">
+                <label for="name" class="label text-slate-500 dark:text-slate-400">Nombre de la Tienda</label>
+                <input id="name" type="text" bind:value={config.name} class="admin-input font-bold text-lg" />
+              </div>
+              <div class="group">
+                <label for="tagline" class="label text-slate-500 dark:text-slate-400">Eslogan (Tagline)</label>
+                <input id="tagline" type="text" bind:value={config.tagline} class="admin-input" />
+              </div>
+              <div class="group">
+                <label for="desc" class="label text-slate-500 dark:text-slate-400">Descripción SEO / Meta</label>
+                <textarea id="desc" bind:value={config.description} class="admin-input h-24 pt-2"></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="glass-card p-8 space-y-6">
+            <h2 class="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-white mb-6">
+              <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-sm">📲</span>
+                Canales de Venta
+            </h2>
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="group">
+                  <label for="wa" class="label text-slate-500 dark:text-slate-400">WhatsApp (Número)</label>
+                  <input id="wa" type="text" bind:value={config.whatsappNumber} class="admin-input" placeholder="Ej: 573001234567" />
+                </div>
+                <div class="group">
+                  <label for="cur" class="label text-slate-500 dark:text-slate-400">Moneda (ej: $)</label>
+                  <input id="cur" type="text" bind:value={config.currency.symbol} class="admin-input text-center" />
+                </div>
+              </div>
+              <div class="group">
+                <label for="greet" class="label text-slate-500 dark:text-slate-400">Saludo inicial WhatsApp</label>
+                <input id="greet" type="text" bind:value={config.whatsappGreeting} class="admin-input" />
+              </div>
+              <div class="group">
+                <label for="email" class="label text-slate-500 dark:text-slate-400">E-mail de contacto</label>
+                <input id="email" type="email" bind:value={config.contact.email} class="admin-input" />
+              </div>
+            </div>
+          </section>
+        </div>
+
+      {:else if activeTab === 'productos'}
+        <!-- 📦 PRODUCT MANAGER -->
+        <div transition:fade class="space-y-6">
+          <!-- Sub-Header: Search & Action -->
+          <div class="flex flex-col sm:flex-row gap-4 items-center justify-between p-4 glass-card">
+            <div class="relative w-full sm:max-w-md">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+              <input 
+                type="text" 
+                bind:value={searchQuery} 
+                placeholder="Buscar productos por nombre o categoría..." 
+                class="admin-input pl-11 !rounded-2xl !bg-white/50 dark:!bg-slate-900/30"
+              />
+            </div>
+            <button onclick={addProduct} class="btn-primary-compact w-full sm:w-auto">
+              <span>+ Añadir Producto</span>
+            </button>
+          </div>
+
+          <!-- Product Grid -->
+          <div class="grid grid-cols-1 gap-4">
+            {#each filteredProducts() as product (product.id)}
+              <div animate:slide class="product-item glass-card scale-in-center">
+                <div class="flex flex-col lg:flex-row gap-6 p-6">
+                  <!-- Image & Controls -->
+                  <div class="shrink-0 space-y-4">
+                    <div class="relative w-full lg:w-48 aspect-square rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-slate-100">
+                      <img src={product.image} alt="" class="w-full h-full object-cover" />
+                      <div class="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+                         <p class="text-[10px] text-white font-bold text-center">PREVISUALIZACIÓN ACTUAL</p>
+                      </div>
+                    </div>
+                    <button onclick={() => removeProduct(product.id)} class="btn-danger w-full">
+                      Eliminar Producto
+                    </button>
+                  </div>
+
+                  <!-- Editable Fields (Grid layout for efficiency) -->
+                  <div class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Col 1: Main Info -->
+                    <div class="lg:col-span-2 space-y-4">
+                      <div>
+                        <label class="label text-slate-400">Nombre del Producto</label>
+                        <input type="text" bind:value={product.name} class="admin-input !font-bold" />
+                      </div>
+                      <div>
+                        <label class="label text-slate-400">Descripción detallada</label>
+                        <textarea bind:value={product.description} class="admin-input h-28 text-sm pt-2"></textarea>
+                      </div>
+                      <div>
+                        <label class="label text-slate-400">URL de la Imagen</label>
+                        <input type="text" bind:value={product.image} class="admin-input !text-[11px] font-mono" />
+                      </div>
+                    </div>
+
+                    <!-- Col 2: Specs & Pricing -->
+                    <div class="space-y-4 bg-slate-50/50 dark:bg-slate-900/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+                      <div class="grid grid-cols-2 gap-3">
+                        <div>
+                          <label class="label text-slate-400">Precio Base</label>
+                          <input type="number" bind:value={product.price} class="admin-input text-emerald-600 dark:text-emerald-400 font-bold" />
+                        </div>
+                        <div>
+                          <label class="label text-slate-400">Oferta (opcional)</label>
+                          <input type="number" bind:value={product.discountPrice} class="admin-input text-rose-500 font-bold" />
+                        </div>
+                      </div>
+                      <div>
+                        <label class="label text-slate-400">Categoría</label>
+                        <select bind:value={product.category} class="admin-input text-sm">
+                          {#each config.categories as cat}
+                            <option value={cat}>{cat}</option>
+                          {/each}
+                        </select>
+                      </div>
+                      <div class="pt-2 space-y-3">
+                        <label class="toggle-container">
+                          <input type="checkbox" bind:checked={product.featured} />
+                          <span class="toggle-label">Marcar como Destacado ⭐</span>
+                        </label>
+                        <label class="toggle-container">
+                          <input type="checkbox" bind:checked={product.isNew} />
+                          <span class="toggle-label">Etiqueta "Nuevo" ✨</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/each}
+          </div>
+        </div>
+
+      {:else}
+        <!-- 📖 ABOUT US EDITOR -->
+        <div transition:fade class="grid grid-cols-1 gap-8">
+           <section class="glass-card p-8">
+            <h2 class="text-xl font-bold flex items-center gap-2 mb-8">
+              <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-sm text-emerald-600">📖</span>
+              Historia y Misión
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div class="space-y-4">
+                <input type="text" bind:value={config.about.historyTitle} class="admin-input font-bold" />
+                <textarea bind:value={config.about.historyContent} class="admin-input h-48 pt-2" placeholder="Usa {name} para el nombre de la tienda"></textarea>
+              </div>
+              <div class="space-y-4">
+                <input type="text" bind:value={config.about.missionTitle} class="admin-input font-bold" />
+                <textarea bind:value={config.about.missionContent} class="admin-input h-48 pt-2"></textarea>
+              </div>
+            </div>
+           </section>
+
+           <section class="glass-card p-8">
+            <div class="flex justify-between items-center mb-8">
+              <h2 class="text-xl font-bold flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-sm text-emerald-600">💎</span>
+                Nuestros Valores
+              </h2>
+              <button onclick={addValue} class="btn-primary-compact">Añadir Valor +</button>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {#each config.about.values as val, i}
+                <div class="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4 relative group">
+                  <button 
+                    onclick={() => config.about.values.splice(i, 1)} 
+                    class="absolute -top-2 -right-2 bg-rose-500 text-white w-7 h-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg flex items-center justify-center"
+                  >×</button>
+                  <div class="flex items-center gap-3">
+                    <input type="text" bind:value={val.icon} class="admin-input !w-14 text-center cursor-default" readonly />
+                    <input type="text" bind:value={val.title} class="admin-input !font-bold" />
+                  </div>
+                  <textarea bind:value={val.description} class="admin-input !text-xs h-24 pt-2"></textarea>
+                </div>
+              {/each}
+            </div>
+           </section>
+        </div>
+      {/if}
+
+    </main>
+  </div>
+{/if}
+
+<style>
+  :global(:root) {
+    --admin-input-bg: rgba(248, 250, 252, 0.8);
+  }
+
+  /* Admin Base Styles */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  :global(.dark) .glass {
+    background: rgba(15, 23, 42, 0.7);
+  }
+
+  .admin-input {
+    @apply w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80 rounded-xl px-4 py-2.5;
+    @apply text-slate-800 dark:text-slate-100 placeholder-slate-400;
+    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all duration-300;
+  }
+
+  .label {
+    @apply block text-[10px] font-bold uppercase tracking-widest mb-1 pl-1;
+  }
+
+  /* Nav Tabs */
+  .tab-btn {
+    @apply px-4 sm:px-6 py-2 rounded-xl text-sm font-bold transition-all duration-300 text-slate-500;
+  }
+  .tab-btn.active {
+    @apply bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 shadow-md;
+  }
+
+  /* Buttons */
+  .btn-save {
+    @apply bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all;
+  }
+  .btn-save:disabled {
+    @apply bg-slate-400 opacity-50 cursor-not-allowed;
+  }
+
+  .btn-primary-compact {
+    @apply bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white text-xs font-bold px-6 py-3 rounded-2xl transition-all shadow-lg;
+  }
+
+  .btn-danger {
+    @apply text-xs font-bold text-rose-500 bg-rose-50 dark:bg-rose-900/10 hover:bg-rose-500 hover:text-white px-4 py-2.5 rounded-xl transition-all border border-rose-100 dark:border-rose-900/20;
+  }
+
+  /* Product Items */
+  .product-item {
+    @apply transition-all duration-300 hover:shadow-xl hover:border-emerald-500/20;
+  }
+
+  .toggle-container {
+    @apply flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-slate-900/30 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-emerald-500/30 transition-all;
+  }
+  .toggle-container input {
+    @apply w-4 h-4 accent-emerald-600;
+  }
+  .toggle-label {
+    @apply text-xs font-medium text-slate-600 dark:text-slate-300;
+  }
+
+  /* Feedback */
+  .feedback-toast {
+    @apply bg-emerald-600 text-white border-emerald-500;
+  }
+  .feedback-toast.error {
+    @apply bg-rose-600 text-white border-rose-500;
+  }
+
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .scale-in-center {
+    animation: scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+</style>

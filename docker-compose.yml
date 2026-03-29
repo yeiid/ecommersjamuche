@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: ecommerce-astro
+    ports:
+      - "4321:4321"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=4321
+      # Contraseña para el panel admin (opcional)
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+    restart: always
+
+volumes:
+  data:
