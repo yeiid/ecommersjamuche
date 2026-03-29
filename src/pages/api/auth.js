@@ -9,7 +9,9 @@ const MASTER_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 
 export async function POST({ request, cookies }) {
   try {
-    const { username, password, action } = await request.json();
+    const body = await request.json();
+    const { username, password, action } = body;
+    console.log(`[AUTH-DEBUG] POST /api/auth | Acción: ${action || 'login'} | Usuario: ${username || 'maestro'}`);
 
     if (action === "logout") {
       cookies.delete("admin_session", { path: "/" });

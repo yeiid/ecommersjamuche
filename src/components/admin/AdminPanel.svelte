@@ -104,12 +104,26 @@
   }
 
   async function logout() {
-    const response = await fetch("/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "logout" }),
-    });
-    if (response.ok) window.location.href = "/admin/login";
+    console.log("[DEBUG] Iniciando logout...");
+    try {
+      const response = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "logout" }),
+      });
+      
+      if (response.ok) {
+        console.log("[DEBUG] Logout exitoso, redirigiendo a login");
+        window.location.href = "/admin/login";
+      } else {
+        const errorText = await response.text();
+        console.error("[DEBUG] Error en logout response:", errorText);
+        alert("Error al cerrar sesión. Intenta recargar la página.");
+      }
+    } catch (err) {
+      console.error("[DEBUG] Error de red en logout:", err);
+      alert("No se pudo contactar con el servidor para cerrar sesión.");
+    }
   }
 
   function addValue() {
