@@ -65,7 +65,7 @@
       "name": "PRUNEX 1",
       "description": "Limpia el colon y combate el estreñimiento de manera natural. Combinación herbal con efecto laxante suave y depurativo.",
       "price": 138100,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/PRUNEX1.png",
       "category": "Línea Control de Peso",
       "featured": true,
       "isNew": false,
@@ -80,7 +80,7 @@
       "name": "FLORA LIV",
       "description": "Regenera y equilibra la flora intestinal con 10 mil millones de probióticos por toma. Protege tu organismo desde adentro.",
       "price": 165700,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/FLORA LIV.png",
       "category": "Línea Inmunológica",
       "featured": false,
       "benefits": [
@@ -95,7 +95,7 @@
       "name": "LIQUID FIBER",
       "description": "Bebida que garantiza la correcta depuración intestinal y el adecuado ritmo de evacuaciones durante el día.",
       "price": 110400,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/LIQUID FIBER.jpg",
       "category": "Línea Control de Peso",
       "featured": false,
       "benefits": [
@@ -110,7 +110,7 @@
       "name": "BERRY BALANCE",
       "description": "Protege tu organismo y mantenlo en perfecto equilibrio. Salud del sistema urinario y eliminación de líquidos.",
       "price": 179400,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/BERRY BALANCE.png",
       "category": "Línea Inmunológica",
       "featured": false,
       "benefits": [
@@ -125,7 +125,7 @@
       "name": "ALPHA BALANCE",
       "description": "Bebida alcalinizante que ayuda a promover la limpieza de elementos tóxicos de tu organismo y equilibrar el pH.",
       "price": 138100,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/ALPHA BALANCE.jpg",
       "category": "Línea Inmunológica",
       "featured": false,
       "benefits": [
@@ -140,7 +140,7 @@
       "name": "REXET",
       "description": "Protege y desintoxica tu hígado de manera natural. Excelente ayuda en casos de hígado graso o resaca.",
       "price": 138100,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/REXET.jpg",
       "category": "Línea Inmunológica",
       "featured": false,
       "benefits": [
@@ -155,7 +155,7 @@
       "name": "BIOPRO+TECT",
       "description": "Nutrición y protección inmunológica del más alto nivel con BioProtein con Colostrum®.",
       "price": 130500,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/BIO PRO+ TECT.png",
       "category": "Línea Inmunológica",
       "featured": true,
       "benefits": [
@@ -170,7 +170,7 @@
       "name": "BIOPRO X ACTIVE",
       "description": "Proteína 100% vegetal de alta asimilación que permite regenerar tejidos en menor tiempo.",
       "price": 151900,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/PROTEIN ACTIVE.png",
       "category": "Línea Inmunológica",
       "featured": false,
       "benefits": [
@@ -185,7 +185,7 @@
       "name": "VITAENERGÍA",
       "description": "Energía duradera y natural. Mejora la asimilación de proteínas y promueve la salud de los ojos.",
       "price": 138100,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/VITAENERGIA.png",
       "category": "Línea Vigor Mental",
       "featured": false,
       "benefits": [
@@ -200,7 +200,7 @@
       "name": "NUTRADAY",
       "description": "Complemento nutricional con Moringa y vitaminas esenciales para niños y adultos. Vitalidad diaria.",
       "price": 138100,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/NUTRADAY.png",
       "category": "Línea Vigor Mental",
       "featured": false,
       "benefits": [
@@ -215,7 +215,7 @@
       "name": "VITAXTRA T+",
       "description": "Energía alerta y de buen ánimo prolongada. Ideal para personas con alta demanda física o anemia.",
       "price": 138100,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/VITA XTRA T+.png",
       "category": "Línea Vigor Mental",
       "featured": true,
       "benefits": [
@@ -230,7 +230,7 @@
       "name": "VERA+",
       "description": "Combinación herbal que fortalece y modula el sistema inmunológico. Adiós alergias y virus.",
       "price": 179400,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/VERA+.jpg",
       "category": "Línea Inmunológica",
       "featured": true,
       "benefits": [
@@ -245,7 +245,7 @@
       "name": "GANOMÁS CAPPUCCINO",
       "description": "Deliciosa bebida con extracto de Ganoderma Lucidum, hongo con propiedades anti-inflamatorias.",
       "price": 97500,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/GANO+ CAPPUCCINO.jpg",
       "category": "Línea Inmunológica",
       "featured": false,
       "benefits": [
@@ -260,7 +260,7 @@
       "name": "THERMO T3",
       "description": "Transforma el exceso de grasa en energía con té verde, negro y rojo. Acción termogénica.",
       "price": 138100,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/THERMO T3.png",
       "category": "Línea Control de Peso",
       "featured": true,
       "benefits": [
@@ -275,7 +275,7 @@
       "name": "NO CARB-T",
       "description": "Inhibe parcialmente la asimilación de carbohidratos y azúcar de los alimentos. Control saludable.",
       "price": 138100,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/NOCARB-T.png",
       "category": "Línea Control de Peso",
       "featured": false,
       "benefits": [
@@ -290,7 +290,7 @@
       "name": "BIOPRO+FIT",
       "description": "Batido proteico bajo en calorías que reduce el apetito y acelera el metabolismo.",
       "price": 115900,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/BIOPRO+ FIT.png",
       "category": "Línea Control de Peso",
       "featured": false,
       "benefits": [
@@ -320,7 +320,7 @@
       "name": "CAFÉ & CAFÉ FIT",
       "description": "Café gourmet colombiano tostado que ayuda en el control de peso al regular el azúcar.",
       "price": 175900,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/CAFÉ & CAFÉ FIT.jpg",
       "category": "Línea Control de Peso",
       "featured": false,
       "benefits": [
@@ -350,7 +350,7 @@
       "name": "PACK 5/14",
       "description": "Completo sistema de cinco productos para reducción de peso saludable en 14 días.",
       "price": 438500,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/PACK 5:14.png",
       "category": "Línea Control de Peso",
       "featured": true,
       "benefits": [
@@ -365,7 +365,7 @@
       "name": "COOL AGE",
       "description": "Péptidos de colágeno bioactivo para elasticidad, firmeza y nutrición celular óptima.",
       "price": 172600,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/COOL AGE.png",
       "category": "Línea Anti-Edad",
       "featured": true,
       "benefits": [
@@ -380,7 +380,7 @@
       "name": "HGH",
       "description": "Nutre la glándula pituitaria para segregar la hormona de la juventud. Vitalidad total.",
       "price": 138100,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/HGH.png",
       "category": "Línea Anti-Edad",
       "featured": false,
       "benefits": [
@@ -395,7 +395,7 @@
       "name": "PASSION",
       "description": "Bebida que incrementa el nivel de energía y libido. Salud glándulas endocrinas.",
       "price": 138100,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/PASSION.jpg",
       "category": "Línea Anti-Edad",
       "featured": false,
       "benefits": [
@@ -410,7 +410,7 @@
       "name": "GOLDEN FLX",
       "description": "Protege y nutre las articulaciones. Efecto anti-inflamatorio y analgésico natural.",
       "price": 151900,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/GOLDEN FLX.png",
       "category": "Línea Anti-Edad",
       "featured": false,
       "benefits": [
@@ -425,7 +425,7 @@
       "name": "PROBAL",
       "description": "Té herbal para equilibrar desbalances hormonales femeninos y ciclo menstrual.",
       "price": 172600,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/PROBAL.jpg",
       "category": "Línea Anti-Edad",
       "featured": false,
       "benefits": [
@@ -440,7 +440,7 @@
       "name": "ON",
       "description": "Mente alerta y activa. Mejora concentración, memoria y rendimiento intelectual.",
       "price": 110400,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/ON.png",
       "category": "Línea Vigor Mental",
       "featured": true,
       "benefits": [
@@ -455,7 +455,7 @@
       "name": "OFF",
       "description": "Mente sin estrés, relajada y enfocada. Optimiza relajación sin somnolencia.",
       "price": 151900,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/OFF.jpg",
       "category": "Línea Vigor Mental",
       "featured": false,
       "benefits": [
@@ -470,7 +470,7 @@
       "name": "PRE SPORT",
       "description": "Bebida rehidratante y energética que prepara el cuerpo para actividad intensa.",
       "price": 151800,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/PRESPRT.png",
       "category": "Línea Sport",
       "featured": true,
       "benefits": [
@@ -485,7 +485,7 @@
       "name": "POST SPORT",
       "description": "Recuperación muscular total con agua de coco y BCAA después del ejercicio.",
       "price": 151800,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/POST SPORT.png",
       "category": "Línea Sport",
       "featured": false,
       "benefits": [
@@ -500,7 +500,7 @@
       "name": "BIOPRO+SPORT",
       "description": "Gana masa muscular magra y nutre huesos y cerebro para desarrollo deportivo.",
       "price": 145000,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/BIOPRO+ SPORT.jpg",
       "category": "Línea Sport",
       "featured": false,
       "benefits": [
@@ -515,7 +515,7 @@
       "name": "BIOPRO X ACTIVE SPORT",
       "description": "Proteína vegetal viva para regeneración y crecimiento muscular acelerado.",
       "price": 167000,
-      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
+      "image": "/img/PROTEIN ACTIVE SPORT.png",
       "category": "Línea Sport",
       "featured": false,
       "benefits": [
