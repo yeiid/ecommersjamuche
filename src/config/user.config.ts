@@ -34,6 +34,10 @@ export function getUsers(): User[] {
       return [];
     }
     const fileContent = fs.readFileSync(filePath, "utf-8");
+    if (!fileContent.trim()) {
+       fs.writeFileSync(filePath, "[]", "utf-8");
+       return [];
+    }
     return JSON.parse(fileContent);
   } catch (error) {
     console.error("Error leyendo users.json:", error);

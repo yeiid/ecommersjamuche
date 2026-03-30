@@ -32,7 +32,7 @@
    */
   async function loadData() {
     try {
-      const response = await fetch("/api/config.json");
+      const response = await fetch(`/api/config.json?t=${Date.now()}`);
       if (response.ok) {
         config = await response.json();
       }
@@ -57,7 +57,7 @@
   async function saveData() {
     isSaving = true;
     try {
-      const response = await fetch("/api/config.json", {
+      const response = await fetch(`/api/config.json?t=${Date.now()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(config),
@@ -105,24 +105,38 @@
 
   async function logout() {
     console.log("[DEBUG] Iniciando logout...");
+    
+    // Failsafe: Redirigir de todos modos tras 2 segundos si el servidor no responde
+    const timeout = setTimeout(() => {
+      console.log("[DEBUG] Timeout alcanzado, forzando redirección");
+      window.location.href = "/admin/login";
+    }, 2000);
+
     try {
-      const response = await fetch("/api/auth", {
+      const response = await fetch(`/api/auth?t=${Date.now()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "logout" }),
       });
       
+      clearTimeout(timeout);
       if (response.ok) {
-        console.log("[DEBUG] Logout exitoso, redirigiendo a login");
+        console.log("[DEBUG] Logout exitoso");
         window.location.href = "/admin/login";
       } else {
-        const errorText = await response.text();
-        console.error("[DEBUG] Error en logout response:", errorText);
-        alert("Error al cerrar sesión. Intenta recargar la página.");
+        const status = response.status;
+        if (status === 403) {
+           alert("Sesión no válida en servidor. Limpiando...");
+           window.location.href = "/admin/login";
+           return;
+        }
+        alert("Error al cerrar sesión. Re-intentando localmente...");
+        window.location.href = "/admin/login";
       }
     } catch (err) {
-      console.error("[DEBUG] Error de red en logout:", err);
-      alert("No se pudo contactar con el servidor para cerrar sesión.");
+      clearTimeout(timeout);
+      console.error("[DEBUG] Error de red", err);
+      window.location.href = "/admin/login";
     }
   }
 
@@ -138,7 +152,7 @@
    */
   async function loadUsers() {
     try {
-      const response = await fetch("/api/users.json");
+      const response = await fetch(`/api/users.json?t=${Date.now()}`);
       if (response.ok) {
         users = await response.json();
       }
@@ -163,7 +177,7 @@
     };
 
     try {
-      const response = await fetch("/api/users.json", {
+      const response = await fetch(`/api/users.json?t=${Date.now()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newUser)
@@ -171,6 +185,9 @@
       if (response.ok) {
         users = [...users, newUser];
         showFeedback("Usuario creado");
+      } else if (response.status === 403) {
+        alert("Tu sesión ha expirado. Por favor re-ingresa.");
+        window.location.href = "/admin/login";
       }
     } catch (e) {
       showFeedback("Error al crear", "error");
@@ -180,7 +197,7 @@
   async function deleteUser(id) {
     if (!confirm("¿Eliminar usuario?")) return;
     try {
-      const response = await fetch("/api/users.json", {
+      const response = await fetch(`/api/users.json?t=${Date.now()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "delete", id })
@@ -188,6 +205,9 @@
       if (response.ok) {
         users = users.filter((u) => u.id !== id);
         showFeedback("Usuario eliminado");
+      } else if (response.status === 403) {
+        alert("Tu sesión ha expirado. Limpiando...");
+        window.location.href = "/admin/login";
       } else {
         showFeedback("Error al eliminar", "error");
       }
