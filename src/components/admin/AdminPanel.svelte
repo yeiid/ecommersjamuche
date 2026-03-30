@@ -104,13 +104,17 @@
   }
 
   async function logout() {
-    console.log("[DEBUG] Iniciando logout...");
+    console.log("[DEBUG] Iniciando logout forzado...");
     
-    // Failsafe: Redirigir de todos modos tras 2 segundos si el servidor no responde
+    // 0. Primer ataque: Limpieza agresiva de cookies por JS (por si el fetch falla)
+    document.cookie = "admin_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax";
+    document.cookie = "admin_session=; Path=/admin; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax";
+    
+    // Failsafe: Redirigir de todos modos tras 1.2 segundos
     const timeout = setTimeout(() => {
-      console.log("[DEBUG] Timeout alcanzado, forzando redirección");
-      window.location.href = "/admin/login";
-    }, 2000);
+      console.log("[DEBUG] Redirección forzada por timeout");
+      window.location.href = "/admin/login?logout=1";
+    }, 1200);
 
     try {
       const response = await fetch(`/api/auth?t=${Date.now()}`, {
@@ -122,21 +126,21 @@
       clearTimeout(timeout);
       if (response.ok) {
         console.log("[DEBUG] Logout exitoso");
-        window.location.href = "/admin/login";
+        window.location.href = "/admin/login?logout=1";
       } else {
         const status = response.status;
         if (status === 403) {
            alert("Sesión no válida en servidor. Limpiando...");
-           window.location.href = "/admin/login";
+           window.location.href = "/admin/login?logout=1";
            return;
         }
         alert("Error al cerrar sesión. Re-intentando localmente...");
-        window.location.href = "/admin/login";
+        window.location.href = "/admin/login?logout=1";
       }
     } catch (err) {
       clearTimeout(timeout);
       console.error("[DEBUG] Error de red", err);
-      window.location.href = "/admin/login";
+      window.location.href = "/admin/login?logout=1";
     }
   }
 

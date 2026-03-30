@@ -56,6 +56,11 @@
         "icon": "💚",
         "title": "Salud Plena",
         "description": "Bienestar en todos los niveles"
+      },
+      {
+        "icon": "✨",
+        "title": "resposabilidad",
+        "description": "Descripción..."
       }
     ]
   },

@@ -2,11 +2,10 @@
 import Layout from "../../layouts/Layout.astro";
 import { storeConfig } from "../../config/store.config";
 
-// Si ya hay una cookie de sesión, redirigir al panel
+// Se ha removido la redirección automática para evitar bucles de "logout infinito"
+// Si el usuario está aquí, es porque quiere entrar o acaba de salir.
 const session = Astro.cookies.get("admin_session");
-if (session?.value?.startsWith("role:")) {
-  return Astro.redirect("/admin");
-}
+const hasSession = session?.value?.startsWith("role:");
 ---
 
 <Layout title="Login Administrador" description="Acceso al panel de control.">
