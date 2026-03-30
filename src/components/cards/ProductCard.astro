@@ -94,7 +94,7 @@ const hasDiscount = discountPrice > 0;
 <script>
   import { addToCart } from "../../stores/cartStore";
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("astro:page-load", () => {
     document.querySelectorAll(".add-to-cart-btn").forEach((button) => {
       button.addEventListener("click", (e) => {
         const target = e.currentTarget;

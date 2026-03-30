@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { fade, slide, scale } from "svelte/transition";
-  import { Package, Settings, Save, Plus, Trash2, Image as ImageIcon, LogOut, CheckCircle2, Search, Filter, Users } from "lucide-svelte";
+  import { Package, Settings, Save, Plus, Trash2, Image as ImageIcon, LogOut, CheckCircle2, Search, Filter, Users, Eye } from "lucide-svelte";
   import { storeConfig } from "../../config/store.config"; // For types only
 
   let { role = "admin" } = $props();
@@ -293,8 +293,18 @@
           {/if}
         </nav>
 
-        <!-- Actions & Logout -->
+        <!-- Actions & Navigation Shortcuts -->
         <div class="flex items-center gap-2">
+          <!-- View Store Shortcut -->
+          <a 
+            href="/" 
+            target="_blank"
+            title="Ver Tienda"
+            class="w-11 h-11 rounded-2xl flex items-center justify-center text-slate-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/10 transition-all active:scale-95 border border-transparent hover:border-yellow-200"
+          >
+            <Eye size={20} />
+          </a>
+
           {#if role !== 'super'}
             <button 
               onclick={saveData}
@@ -315,7 +325,7 @@
           <button 
             onclick={logout} 
             title="Cerrar Sesión"
-            class="w-11 h-11 rounded-2xl flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all active:scale-95"
+            class="w-11 h-11 rounded-2xl flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all active:scale-95 border border-transparent hover:border-rose-200"
           >
             <LogOut size={20} />
           </button>
