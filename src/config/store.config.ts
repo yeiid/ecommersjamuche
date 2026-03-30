@@ -99,9 +99,18 @@ export function saveStoreConfig(config: StoreConfig): boolean {
   }
 }
 
-// Exportamos una instancia inicial para compatibilidad con componentes Astro existentes
-// Nota: Para datos siempre actualizados en SSR, usar getStoreConfig()
-export const storeConfig = getStoreConfig();
+/**
+ * ═══ CONFIGURACIÓN DINÁMICA (PROXY) ═══
+ * Para que todos los componentes Astro existentes obtengan datos actualizados
+ * en cada petición sin cambiar su código, usamos un Proxy.
+ * En SSR, cada acceso a storeConfig.xxx leerá el JSON fresco del disco.
+ */
+export const storeConfig = new Proxy({} as StoreConfig, {
+  get(_, prop) {
+    const config = getStoreConfig();
+    return (config as any)[prop];
+  }
+});
 
 /**
  * Formatear precio según la moneda configurada
