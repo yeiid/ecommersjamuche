@@ -6,11 +6,10 @@
 
 @layer base {
   :root {
-    --color-primary: #facc15; /* Yellow-400 */
-    --color-secondary: #000000; /* Black */
-    --color-accent: #fbbf24; /* Amber-400 */
-    --color-bg: #ffffff;
-    --color-surface: #f8fafc;
+    --color-primary: theme('colors.primary');
+    --color-accent: theme('colors.accent');
+    --color-bg: theme('colors.surface.50');
+    --color-surface: theme('colors.surface.50');
     --color-text: #0f172a;
     --color-text-muted: #64748b;
     --color-border: #e2e8f0;
@@ -67,14 +66,14 @@
   }
 
   .btn-primary {
-    @apply bg-yellow-400 text-black hover:bg-yellow-500 shadow-lg hover:shadow-yellow-500/25;
-    @apply focus-visible:ring-yellow-500;
+    @apply bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/25;
+    @apply focus-visible:ring-primary;
   }
 
   .btn-secondary {
     @apply bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800;
-    @apply hover:border-yellow-400 text-slate-800 dark:text-slate-100;
-    @apply focus-visible:ring-yellow-400;
+    @apply hover:border-primary text-slate-800 dark:text-slate-100;
+    @apply focus-visible:ring-primary;
   }
 
   .btn-whatsapp {
@@ -239,5 +238,5 @@
 }
 
 .hero-gradient-overlay {
-  background: radial-gradient(ellipse at 70% 50%, rgba(250, 204, 21, 0.1) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 70% 50%, rgb(var(--color-primary) / 0.1) 0%, transparent 70%);
 }

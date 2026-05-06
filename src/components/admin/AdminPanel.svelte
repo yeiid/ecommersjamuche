@@ -6,7 +6,7 @@
 
   let { role = "admin" } = $props();
   let config = $state(null);
-  let activeTab = $state(role === 'super' ? 'usuarios' : "general"); // "general", "productos", "about", "usuarios"
+  let activeTab = $state(role === 'super' ? 'usuarios' : "general"); // "general", "productos", "about", "usuarios", "apariencia"
   let users = $state([]); // Solo para súper admin
   let isSaving = $state(false);
   let feedback = $state("");
@@ -283,6 +283,14 @@
               <span class="sm:hidden">📖</span>
               <span class="hidden sm:inline">📖 Nosotros</span>
             </button>
+            <button 
+              onclick={() => activeTab = 'apariencia'}
+              class:active={activeTab === 'apariencia'}
+              class="tab-btn"
+            >
+              <span class="sm:hidden">🎨</span>
+              <span class="hidden sm:inline">🎨 Apariencia</span>
+            </button>
           {/if}
           
           {#if role === 'super'}
@@ -531,6 +539,55 @@
               </div>
             {/each}
           </div>
+        </div>
+
+      {:else if activeTab === 'apariencia'}
+        <!-- 🎨 APARIENCIA SETTINGS -->
+        <div transition:fade class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <section class="glass-card p-8 space-y-6">
+            <h2 class="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-white mb-6">
+              <span class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-sm">🎨</span>
+                Colores de Marca
+            </h2>
+            <div class="space-y-6">
+              <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div class="space-y-1">
+                  <label class="font-bold text-slate-700 dark:text-slate-200">Color Primario (Rosa)</label>
+                  <p class="text-xs text-slate-500">Usado en botones, iconos y elementos principales.</p>
+                </div>
+                <input type="color" bind:value={config.theme.primary} class="w-12 h-12 rounded-xl cursor-pointer bg-transparent" />
+              </div>
+
+              <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div class="space-y-1">
+                  <label class="font-bold text-slate-700 dark:text-slate-200">Color de Acento (Violeta)</label>
+                  <p class="text-xs text-slate-500">Usado en hover, badges y detalles secundarios.</p>
+                </div>
+                <input type="color" bind:value={config.theme.accent} class="w-12 h-12 rounded-xl cursor-pointer bg-transparent" />
+              </div>
+
+              <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div class="space-y-1">
+                  <label class="font-bold text-slate-700 dark:text-slate-200">Fondo Principal (Blanco)</label>
+                  <p class="text-xs text-slate-500">Color base de las secciones claras.</p>
+                </div>
+                <input type="color" bind:value={config.theme.surface} class="w-12 h-12 rounded-xl cursor-pointer bg-transparent" />
+              </div>
+            </div>
+          </section>
+
+          <section class="glass-card p-8 flex flex-col items-center justify-center text-center space-y-4">
+             <div class="w-20 h-20 rounded-full flex items-center justify-center text-3xl shadow-inner mb-2" style="background-color: {config.theme.primary}; color: white">
+                ✨
+             </div>
+             <h3 class="text-xl font-bold">Vista Previa</h3>
+             <p class="text-sm text-slate-500 max-w-xs">Los cambios se aplicarán a toda la tienda al presionar "Guardar".</p>
+             <div class="flex gap-2">
+                <div class="w-8 h-8 rounded-lg shadow-sm" style="background-color: {config.theme.primary}"></div>
+                <div class="w-8 h-8 rounded-lg shadow-sm" style="background-color: {config.theme.accent}"></div>
+                <div class="w-8 h-8 rounded-lg shadow-sm border border-slate-200" style="background-color: {config.theme.surface}"></div>
+             </div>
+          </section>
         </div>
 
       {:else if activeTab === 'usuarios'}

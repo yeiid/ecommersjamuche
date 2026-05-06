@@ -17,6 +17,14 @@ const pageTitle = title
   ? `${title} | ${storeConfig.name}`
   : `${storeConfig.name} — ${storeConfig.tagline}`;
 const pageDescription = description || storeConfig.description;
+
+// Función para convertir Hex a RGB (necesario para Tailwind con variables CSS)
+function hexToRgb(hex: string) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result 
+    ? `${parseInt(result[1], 16)} ${parseInt(result[2], 16)} ${parseInt(result[3], 16)}`
+    : "244 63 94"; // Fallback rosa
+}
 ---
 
 <!doctype html>
@@ -29,6 +37,19 @@ const pageDescription = description || storeConfig.description;
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
+
+    {/* Inyección dinámica de colores desde store.json */}
+    <style define:vars={{
+      primaryRgb: hexToRgb(storeConfig.theme?.primary || "#f43f5e"),
+      accentRgb: hexToRgb(storeConfig.theme?.accent || "#8b5cf6"),
+      surfaceRgb: hexToRgb(storeConfig.theme?.surface || "#ffffff")
+    }}>
+      :root {
+        --color-primary: var(--primaryRgb);
+        --color-accent: var(--accentRgb);
+        --color-surface: var(--surfaceRgb);
+      }
+    </style>
 
     <!-- Open Graph -->
     <meta property="og:title" content={pageTitle} />
