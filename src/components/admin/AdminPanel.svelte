@@ -377,6 +377,10 @@
                 <input id="tagline" type="text" bind:value={config.tagline} class="admin-input" />
               </div>
               <div class="group">
+                <label for="badge" class="label text-slate-500 dark:text-slate-400">Insignia Destacada (Badge)</label>
+                <input id="badge" type="text" bind:value={config.heroBadge} class="admin-input text-primary font-bold" placeholder="Ej: ✨ Expertos en Belleza" />
+              </div>
+              <div class="group">
                 <label for="desc" class="label text-slate-500 dark:text-slate-400">Descripción SEO / Meta</label>
                 <textarea id="desc" bind:value={config.description} class="admin-input h-24 pt-2"></textarea>
               </div>
