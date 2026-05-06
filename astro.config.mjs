@@ -6,7 +6,7 @@ import node from "@astrojs/node";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://vidaglow.com",
+  site: process.env.SITE_URL || "https://ejemplo.com",
   integrations: [tailwind(), svelte()],
   output: "server",
   adapter: node({

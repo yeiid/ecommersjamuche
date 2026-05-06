@@ -13,9 +13,15 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# jetbrains setting folder
-.idea/
+# secrets and data
+.env
+.env.*
+data/*.json
+!data/store.json.example
 
-# manuals and extractions (Portafolio PDF)
+# manuals and extractions
 *.pdf
 extracted_content.txt
+
+# jetbrains setting folder
+.idea/
