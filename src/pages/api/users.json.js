@@ -38,8 +38,11 @@ export async function POST({ request, cookies }) {
     }
 
     // Acción: CREAR (Por defecto)
+    // Limpiar espacios y forzar minúsculas para evitar errores
+    newUser.username = newUser.username.trim().toLowerCase();
+    
     // Evitar duplicados
-    if (users.find(u => u.username === newUser.username)) {
+    if (users.find(u => u.username.trim().toLowerCase() === newUser.username)) {
       return new Response(JSON.stringify({ error: "El usuario ya existe" }), { status: 400 });
     }
 

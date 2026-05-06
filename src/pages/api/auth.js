@@ -59,8 +59,11 @@ export async function POST({ request, cookies }) {
 
     // ── 2. Verificar usuario admin desde la base de datos ──
     if (username) {
+      const cleanUsername = username.trim().toLowerCase();
       const users = getUsers();
-      const user = users.find((u) => u.username === username);
+      
+      // Buscamos comparando limpiamente
+      const user = users.find((u) => u.username.trim().toLowerCase() === cleanUsername);
 
       if (user) {
         // Soporta contraseñas hasheadas y planas (migración gradual)
@@ -70,13 +73,13 @@ export async function POST({ request, cookies }) {
           : password === user.password;
 
         if (isValid) {
-          console.log(`[AUTH] Admin '${username}' autenticado`);
+          console.log(`[AUTH] Admin '${cleanUsername}' autenticado`);
           cookies.set("admin_session", `role:admin:${user.username}`, {
             path: "/",
             httpOnly: true,
             secure: import.meta.env.PROD,
             sameSite: "lax",
-            maxAge: 60 * 60 * 24,
+            maxAge: 60 * 60 * 24, // 24 horas
           });
           return new Response(JSON.stringify({ success: true, role: "admin" }), { status: 200 });
         }
