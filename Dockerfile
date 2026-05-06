@@ -23,7 +23,7 @@ WORKDIR /app
 
 # Definir variables de entorno
 ENV HOST=0.0.0.0
-ENV PORT=4321
+ENV PORT=4330
 ENV NODE_ENV=production
 
 # Copiar solo lo necesario desde el build stage
@@ -36,7 +36,7 @@ COPY --from=build /app/data ./data
 RUN mkdir -p /app/data
 
 # Exponer el puerto
-EXPOSE 4321
+EXPOSE 4330
 
 # Comando para iniciar el servidor de Astro (Node standalone)
 CMD ["node", "./dist/server/entry.mjs"]
