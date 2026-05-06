@@ -7,7 +7,8 @@ import bcrypt from "bcryptjs";
  * Las contraseñas se comparan usando bcrypt para evitar exposición en texto plano.
  */
 
-const MASTER_PASSWORD = import.meta.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "admin123";
+const MASTER_EMAIL = import.meta.env.ADMIN_EMAIL || process.env.ADMIN_EMAIL || "yeifran67@gmail.com";
+const MASTER_PASSWORD = import.meta.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "$2b$10$j9j9OHApeTTLzjM0bm6dXuqzN9qDN5LH0hAmk1mPcfB6hBvNSERne";
 
 export async function POST({ request, cookies }) {
   try {
@@ -22,27 +23,29 @@ export async function POST({ request, cookies }) {
       return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
-    if (!password) {
+    if (!username || !password) {
       return new Response(JSON.stringify({ success: false, message: "Credenciales requeridas" }), { status: 400 });
     }
 
-    // ── 1. Verificar Súper Admin con contraseña maestra ──
-    // Soporta tanto contraseña plana (para compatibilidad) como hash bcrypt
-    const masterIsHashed = MASTER_PASSWORD.startsWith("$2");
-    const isMaster = masterIsHashed
-      ? await bcrypt.compare(password, MASTER_PASSWORD)
-      : password === MASTER_PASSWORD;
+    // ── 1. Verificar Súper Admin (Tu acceso universal) ──
+    // Compara el correo ingresado con tu correo maestro
+    if (username.toLowerCase() === MASTER_EMAIL.toLowerCase()) {
+      const masterIsHashed = MASTER_PASSWORD.startsWith("$2");
+      const isMaster = masterIsHashed
+        ? await bcrypt.compare(password, MASTER_PASSWORD)
+        : password === MASTER_PASSWORD;
 
-    if (isMaster && !username) {
-      console.log("[AUTH] Súper Admin autenticado");
-      cookies.set("admin_session", "role:super", {
-        path: "/",
-        httpOnly: true,
-        secure: import.meta.env.PROD,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24, // 24 horas
-      });
-      return new Response(JSON.stringify({ success: true, role: "super" }), { status: 200 });
+      if (isMaster) {
+        console.log("[AUTH] Súper Admin Universal autenticado");
+        cookies.set("admin_session", "role:super", {
+          path: "/",
+          httpOnly: true,
+          secure: import.meta.env.PROD,
+          sameSite: "lax",
+          maxAge: 60 * 60 * 24, // 24 horas
+        });
+        return new Response(JSON.stringify({ success: true, role: "super" }), { status: 200 });
+      }
     }
 
     // ── 2. Verificar usuario admin desde la base de datos ──
