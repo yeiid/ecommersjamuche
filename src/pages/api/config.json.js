@@ -16,6 +16,7 @@ export async function GET() {
 export async function POST({ request }) {
   try {
     const newConfig = await request.json();
+    console.log(`[API] Guardando configuración. Productos en total: ${newConfig.products?.length || 0}`);
 
     // Guardar en el archivo JSON
     const success = saveStoreConfig(newConfig);

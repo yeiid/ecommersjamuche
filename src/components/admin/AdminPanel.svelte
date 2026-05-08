@@ -12,10 +12,10 @@
   let feedback = $state("");
   let feedbackType = $state("success"); // "success" or "error"
   let searchQuery = $state("");
+  let hasUnsavedChanges = $state(false);
 
-  // Temporary item for adding new product
+  // Template for adding new products (deep copy handled in addProduct)
   const newProductTemplate = {
-    id: "",
     name: "Nuevo Producto",
     description: "Descripción del producto...",
     price: 0,
@@ -65,6 +65,7 @@
 
       if (response.ok) {
         showFeedback("¡Cambios guardados correctamente!");
+        hasUnsavedChanges = false;
       } else {
         showFeedback("Error al guardar", "error");
       }
@@ -89,21 +90,33 @@
 
   function addProduct() {
     const defaultCategory = config.categories?.[0] || "";
+    const newId = `prod-${Date.now()}`;
+    
+    // Deep clone benefits to avoid shared references
     const newP = { 
-      ...newProductTemplate, 
-      id: Date.now().toString(),
+      ...JSON.parse(JSON.stringify(newProductTemplate)), 
+      id: newId,
       category: defaultCategory 
     };
+    
     config.products = [newP, ...config.products];
+    hasUnsavedChanges = true;
     activeTab = "productos";
-    searchQuery = ""; // Limpiar búsqueda para ver el nuevo
-    showFeedback("Producto añadido al inicio. ¡No olvides guardar!");
+    searchQuery = ""; 
+    
+    showFeedback("Nuevo producto añadido al inicio. Recuerda guardar.");
+    
+    // Smooth scroll to top to see the new product
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
   }
 
   function removeProduct(id) {
     if (confirm("¿Eliminar este producto permanentemente?")) {
       config.products = config.products.filter((p) => p.id !== id);
-      showFeedback("Producto eliminado");
+      hasUnsavedChanges = true;
+      showFeedback("Producto eliminado de la lista local");
     }
   }
 
@@ -157,16 +170,19 @@
 
   function addBenefit(product) {
     product.benefits = [...(product.benefits || []), "Nuevo beneficio"];
+    hasUnsavedChanges = true;
   }
 
   function removeBenefit(product, index) {
     product.benefits = product.benefits.filter((_, i) => i !== index);
+    hasUnsavedChanges = true;
   }
 
   function addCategory() {
     const newCat = prompt("Nombre de la nueva categoría:");
     if (newCat && !config.categories.includes(newCat)) {
       config.categories = [...config.categories, newCat];
+      hasUnsavedChanges = true;
       showFeedback("Categoría añadida");
     }
   }
@@ -347,16 +363,19 @@
             <button 
               onclick={saveData}
               disabled={isSaving}
-              class="btn-save"
+              class="btn-save relative"
+              class:pulse={hasUnsavedChanges && !isSaving}
             >
               {#if isSaving}
                 <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Guardando...</span>
               {:else}
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+                <Save size={18} />
+                <span>Guardar Cambios</span>
+                {#if hasUnsavedChanges}
+                  <span class="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900 animate-bounce"></span>
+                {/if}
               {/if}
-              <span class="hidden md:inline">{isSaving ? 'Guardando...' : 'Guardar'}</span>
             </button>
           {/if}
           
