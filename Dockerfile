@@ -6,9 +6,10 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 # Copiar archivos de configuración
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* .npmrc ./
 
 # Instalar dependencias
+RUN pnpm config set only-built-dependencies esbuild,sharp
 RUN pnpm install --frozen-lockfile
 
 # Copiar el resto del código
