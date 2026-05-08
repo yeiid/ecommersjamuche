@@ -5,10 +5,13 @@ WORKDIR /app
 # Instalar pnpm
 RUN npm install -g pnpm
 
+# Autorizar scripts de construcción (esbuild y sharp son críticos para Astro)
+ENV PNPM_ONLY_BUILT_DEPENDENCIES=esbuild,sharp
+
 # Copiar archivos de configuración
 COPY package.json pnpm-lock.yaml* .npmrc ./
 
-# Instalar dependencias autorizando scripts de construcción
+# Instalar dependencias
 RUN pnpm install --frozen-lockfile
 
 # Copiar el resto del código
