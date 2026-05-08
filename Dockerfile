@@ -8,36 +8,29 @@ RUN npm install -g pnpm
 # Copiar archivos de configuración
 COPY package.json pnpm-lock.yaml* .npmrc ./
 
-# Instalar dependencias
-RUN pnpm config set only-built-dependencies esbuild,sharp
+# Instalar dependencias autorizando scripts de construcción
 RUN pnpm install --frozen-lockfile
 
 # Copiar el resto del código
 COPY . .
 
-# Construir la aplicación (Astro output: "server")
+# Construir la aplicación
 RUN pnpm run build
 
 # Stage 2: Runtime
 FROM node:22-slim AS runtime
 WORKDIR /app
 
-# Definir variables de entorno
 ENV HOST=0.0.0.0
 ENV PORT=4330
 ENV NODE_ENV=production
 
-# Copiar solo lo necesario desde el build stage
+# Copiar solo lo esencial
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/data ./data
 
-# Asegurarse de que exista la carpeta data (aunque se montará un volumen)
-RUN mkdir -p /app/data
-
-# Exponer el puerto
 EXPOSE 4330
 
-# Comando para iniciar el servidor de Astro (Node standalone)
 CMD ["node", "./dist/server/entry.mjs"]
