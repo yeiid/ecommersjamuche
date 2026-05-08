@@ -569,7 +569,6 @@
                           <input type="text" bind:value={product.image} class="admin-input text-xs" placeholder="https://..." />
                         </div>
                       </div>
-                    </div>
 
                     <!-- Col 2: Specs & Pricing -->
                     <div class="space-y-4 bg-slate-50/50 dark:bg-slate-900/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50">

@@ -11,8 +11,10 @@ ENV PNPM_ONLY_BUILT_DEPENDENCIES=esbuild,sharp
 # Copiar archivos de configuración
 COPY package.json pnpm-lock.yaml* .npmrc ./
 
-# Instalar dependencias
-RUN pnpm install --frozen-lockfile
+# Instalar dependencias autorizando scripts de construcción
+# Usamos --ignore-scripts primero y luego rebuild para máxima compatibilidad en Docker
+RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm rebuild esbuild sharp
 
 # Copiar el resto del código
 COPY . .
