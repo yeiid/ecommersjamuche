@@ -24,7 +24,7 @@
     category: "",
     featured: false,
     isNew: true,
-    benefits: [],
+    benefits: ["Beneficio 1", "Beneficio 2"],
   };
 
   /**
@@ -78,22 +78,26 @@
   /**
    * Filtrar productos según la búsqueda
    */
-  const filteredProducts = $derived(() => {
-    if (!config?.products) return [];
-    if (!searchQuery) return config.products;
-    const q = searchQuery.toLowerCase();
-    return config.products.filter(p => 
-      p.name.toLowerCase().includes(q) || 
-      p.category.toLowerCase().includes(q)
-    );
-  });
+  const filteredProducts = $derived(
+    (config?.products || []).filter(p => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return p.name.toLowerCase().includes(q) || 
+             p.category.toLowerCase().includes(q);
+    })
+  );
 
   function addProduct() {
-    const newP = { ...newProductTemplate, id: Date.now().toString() };
+    const defaultCategory = config.categories?.[0] || "";
+    const newP = { 
+      ...newProductTemplate, 
+      id: Date.now().toString(),
+      category: defaultCategory 
+    };
     config.products = [newP, ...config.products];
     activeTab = "productos";
     searchQuery = ""; // Limpiar búsqueda para ver el nuevo
-    showFeedback("Producto añadido al inicio");
+    showFeedback("Producto añadido al inicio. ¡No olvides guardar!");
   }
 
   function removeProduct(id) {
@@ -149,6 +153,28 @@
       ...config.about.values,
       { icon: "✨", title: "Nuevo Valor", description: "Descripción..." },
     ];
+  }
+
+  function addBenefit(product) {
+    product.benefits = [...(product.benefits || []), "Nuevo beneficio"];
+  }
+
+  function removeBenefit(product, index) {
+    product.benefits = product.benefits.filter((_, i) => i !== index);
+  }
+
+  function addCategory() {
+    const newCat = prompt("Nombre de la nueva categoría:");
+    if (newCat && !config.categories.includes(newCat)) {
+      config.categories = [...config.categories, newCat];
+      showFeedback("Categoría añadida");
+    }
+  }
+
+  function removeCategory(cat) {
+    if (confirm(`¿Eliminar categoría "${cat}"? Los productos en esta categoría no se borrarán pero quedarán sin categoría asignada.`)) {
+      config.categories = config.categories.filter(c => c !== cat);
+    }
   }
 
   /**
@@ -456,6 +482,36 @@
           </section>
         </div>
 
+        <!-- 📁 CATEGORIES MANAGEMENT -->
+        <div transition:fade class="grid grid-cols-1 gap-8 mt-8">
+          <section class="glass-card p-8 space-y-6">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-white">
+                <span class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-sm">📁</span>
+                  Gestión de Categorías
+              </h2>
+              <button onclick={addCategory} class="btn-primary-compact !py-2 !px-4">
+                <span>+ Añadir Categoría</span>
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-3">
+              {#each config.categories as cat}
+                <div class="group relative flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 pl-4 pr-2 py-2 rounded-2xl text-sm font-bold shadow-sm hover:border-yellow-500/50 transition-all">
+                  <span class="text-slate-700 dark:text-slate-200">{cat}</span>
+                  <button 
+                    onclick={() => removeCategory(cat)} 
+                    class="w-6 h-6 flex items-center justify-center rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-colors"
+                    title="Eliminar categoría"
+                  >×</button>
+                </div>
+              {/each}
+              {#if config.categories.length === 0}
+                <p class="text-sm text-slate-500 italic">No hay categorías definidas. Los productos necesitan al menos una.</p>
+              {/if}
+            </div>
+          </section>
+        </div>
+
       {:else if activeTab === 'productos'}
         <!-- 📦 PRODUCT MANAGER -->
         <div transition:fade class="space-y-6">
@@ -477,7 +533,7 @@
 
           <!-- Product Grid -->
           <div class="grid grid-cols-1 gap-4">
-            {#each filteredProducts() as product (product.id)}
+            {#each filteredProducts as product (product.id)}
               <div animate:slide class="product-item glass-card scale-in-center">
                 <div class="flex flex-col lg:flex-row gap-6 p-6">
                   <!-- Image & Controls -->
@@ -507,6 +563,14 @@
                       </div>
                     </div>
 
+                      <div>
+                        <label class="label text-slate-400">URL de la Imagen</label>
+                        <div class="flex gap-2">
+                          <input type="text" bind:value={product.image} class="admin-input text-xs" placeholder="https://..." />
+                        </div>
+                      </div>
+                    </div>
+
                     <!-- Col 2: Specs & Pricing -->
                     <div class="space-y-4 bg-slate-50/50 dark:bg-slate-900/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50">
                       <div class="grid grid-cols-2 gap-3">
@@ -522,6 +586,7 @@
                       <div>
                         <label class="label text-slate-400">Categoría</label>
                         <select bind:value={product.category} class="admin-input text-sm">
+                          <option value="">Sin categoría</option>
                           {#each config.categories as cat}
                             <option value={cat}>{cat}</option>
                           {/each}
@@ -537,6 +602,25 @@
                           <span class="toggle-label">Etiqueta "Nuevo" ✨</span>
                         </label>
                       </div>
+                    </div>
+
+                    <!-- Col 3: Benefits -->
+                    <div class="space-y-4">
+                       <div class="flex justify-between items-center">
+                         <label class="label text-slate-400">Beneficios (Checklist)</label>
+                         <button onclick={() => addBenefit(product)} class="text-[10px] font-bold text-yellow-600 hover:underline">+ Añadir</button>
+                       </div>
+                       <div class="space-y-2">
+                         {#each (product.benefits || []) as benefit, idx}
+                           <div class="flex gap-2">
+                             <input type="text" bind:value={product.benefits[idx]} class="admin-input !py-1.5 !px-3 text-xs" />
+                             <button onclick={() => removeBenefit(product, idx)} class="text-rose-500 hover:text-rose-700 px-1">×</button>
+                           </div>
+                         {/each}
+                         {#if !product.benefits || product.benefits.length === 0}
+                           <p class="text-[10px] text-slate-400 italic">No hay beneficios agregados.</p>
+                         {/if}
+                       </div>
                     </div>
                   </div>
                 </div>

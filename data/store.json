@@ -62,46 +62,76 @@
     {
       "id": "si-01",
       "name": "Manicure Premium",
-      "description": "Limpieza profunda, exfoliación, hidratación y esmaltado semipermanente con los mejores diseños.",
+      "description": "Limpieza profunda, exfoliación, hidratación y esmaltado semipermanente con los mejores diseños de vanguardia.",
       "price": 45000,
-      "image": "/img/manicure.jpg",
+      "image": "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800",
       "category": "Manicure & Pedicure",
       "featured": true,
       "isNew": false,
       "benefits": [
-        "Esmaltado de larga duración",
-        "Hidratación profunda",
-        "Diseños personalizados"
+        "Esmaltado de larga duración (21 días)",
+        "Hidratación con aceites esenciales",
+        "Diseños personalizados incluidos"
       ]
     },
     {
       "id": "si-02",
       "name": "Tratamiento Hidratación Capilar",
-      "description": "Recupera el brillo y la suavidad de tu cabello con nuestra fórmula exclusiva de nutrición intensa.",
+      "description": "Recupera el brillo y la suavidad de tu cabello con nuestra fórmula exclusiva de nutrición intensa a base de argán.",
       "price": 85000,
-      "image": "/img/capilar.jpg",
+      "image": "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800",
       "category": "Tratamientos Capilares",
       "featured": true,
       "isNew": true,
       "benefits": [
-        "Elimina el frizz",
-        "Brillo espejo",
-        "Nutrición desde la raíz"
+        "Elimina el frizz al 100%",
+        "Brillo espejo inmediato",
+        "Nutrición desde la raíz hasta las puntas"
       ]
     },
     {
-      "id": "si-03",
-      "name": "Diseño de Corte & Cepillado",
-      "description": "Corte profesional según tu tipo de rostro seguido de un cepillado que resalta tu nuevo look.",
-      "price": 60000,
-      "image": "/img/corte.jpg",
+      "id": "si-04",
+      "name": "Balayage de Autor",
+      "description": "Técnica de aclarado natural que aporta luminosidad y dimensión a tu cabello sin dañar la fibra capilar.",
+      "price": 250000,
+      "image": "https://images.unsplash.com/photo-1522336572018-3b89579f10df?w=800",
       "category": "Peluquería",
+      "featured": true,
+      "isNew": true,
+      "benefits": [
+        "Transición de color perfecta",
+        "Incluye matizante y sellador de cutícula",
+        "Asesoría de color personalizada"
+      ]
+    },
+    {
+      "id": "si-05",
+      "name": "Limpieza Facial Profunda",
+      "description": "Elimina impurezas, puntos negros y células muertas. Incluye vapor de ozono y mascarilla hidratante.",
+      "price": 75000,
+      "image": "https://images.unsplash.com/photo-1570172619245-d11f532d558f?w=800",
+      "category": "Estética Facial",
       "featured": false,
       "isNew": false,
       "benefits": [
-        "Asesoría de imagen",
-        "Acabado profesional",
-        "Cuidado post-corte"
+        "Piel renovada y luminosa",
+        "Cierre de poros y control de grasa",
+        "Masaje relajante facial incluido"
+      ]
+    },
+    {
+      "id": "si-06",
+      "name": "Pedicure Spa Relax",
+      "description": "Tratamiento completo para pies con sales marinas, exfoliación profunda y masaje relajante.",
+      "price": 35000,
+      "image": "https://images.unsplash.com/photo-1519415510271-4197581b1a1c?w=800",
+      "category": "Manicure & Pedicure",
+      "featured": false,
+      "isNew": false,
+      "benefits": [
+        "Eliminación de callosidades",
+        "Relajación muscular profunda",
+        "Esmaltado tradicional de alta gama"
       ]
     }
   ]
