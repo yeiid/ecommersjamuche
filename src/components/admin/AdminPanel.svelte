@@ -57,10 +57,13 @@
   async function saveData() {
     isSaving = true;
     try {
+      // Usamos JSON stringify/parse para limpiar los proxies de Svelte 5 y enviar un objeto plano
+      const dataToSave = JSON.parse(JSON.stringify(config));
+      
       const response = await fetch(`/api/config.json?t=${Date.now()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config),
+        body: JSON.stringify(dataToSave),
       });
 
       if (response.ok) {
@@ -90,33 +93,28 @@
 
   function addProduct() {
     const defaultCategory = config.categories?.[0] || "";
-    const newId = `prod-${Date.now()}`;
+    const newId = `p-${Date.now()}`;
     
-    // Deep clone benefits to avoid shared references
     const newP = { 
-      ...JSON.parse(JSON.stringify(newProductTemplate)), 
       id: newId,
-      category: defaultCategory 
+      name: "Nuevo Producto",
+      description: "Descripción...",
+      price: 0,
+      image: "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400",
+      category: defaultCategory,
+      benefits: []
     };
     
     config.products = [newP, ...config.products];
     hasUnsavedChanges = true;
-    activeTab = "productos";
-    searchQuery = ""; 
-    
-    showFeedback("Nuevo producto añadido al inicio. Recuerda guardar.");
-    
-    // Smooth scroll to top to see the new product
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
+    showFeedback("Producto añadido (temporalmente hasta guardar)");
   }
 
   function removeProduct(id) {
-    if (confirm("¿Eliminar este producto permanentemente?")) {
-      config.products = config.products.filter((p) => p.id !== id);
+    if (confirm("¿Eliminar este producto?")) {
+      config.products = config.products.filter(p => p.id !== id);
       hasUnsavedChanges = true;
-      showFeedback("Producto eliminado de la lista local");
+      showFeedback("Producto eliminado (temporalmente hasta guardar)");
     }
   }
 
